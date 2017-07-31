@@ -1,0 +1,50 @@
+%include('common/header')
+
+<!-- Start: Page Content -->
+<div id="PageContent">
+
+  %include('includes/_noscript')
+
+  <!-- Start: Content -->
+  <div id="Login" class="main-section unrendered{{ ' eula' if eula else '' }}">
+    <!-- Start: Header -->
+    <div id="PageHeader" class="page-header">
+      <div class="ir edgeos-header-logo{{ (' ' + custom_logo) if custom_logo else '' }}">EdgeOS</div>
+    </div>
+    <!-- End: Header -->
+
+    <div class="content-outer-container">
+      <div class="content-inner-container">
+        <div class="content">
+          <h1 class="section-title">{{ error or 'Please Login' }}</h1>
+
+          <!-- Start: Section Container -->
+          <div class="section-container tall">
+            <form id="LoginForm" method="post" class="ui-form">
+              <input id="Username" name="username" class="text-input{{ ' ui-state-error' if defined('error') and error else '' }}" type="text" placeholder="Username" autocapitalize="off" autocorrection="off"/>
+              <input id="Password" name="password" class="text-input{{ ' ui-state-error' if defined('error') and error else '' }}" type="password" placeholder="Password" />
+
+              %if eula:
+                %include('includes/_eula')
+
+                <label for="TermsOfUse" id="TermsOfUseLabel"><input id="TermsOfUse" name="accept-eula" type="checkbox" />I agree to the terms of this License Agreement</label>
+              %end
+
+              <input id="LoginButton" class="submit-input" type="submit" value="Login" />
+            </form>
+
+            <!-- Preload the application loader image for the application page -->
+            <div class="application-loader"></div>
+          </div>
+          <!-- End: Section Container -->
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End: Content -->
+
+</div>
+<!-- End: Container -->
+
+%include('common/footer')

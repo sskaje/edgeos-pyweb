@@ -1,0 +1,434 @@
+<!-- Start: Routing -->
+<div id="Routing" class="main-section">
+  <div class="section-tabs">
+    <ul>
+      <li><a href="#Routing/Static" data-container="RoutingStatic">Routes</a></li>
+      <li><a href="#Routing/Dynamic" data-container="RoutingDynamic">OSPF</a></li>
+    </ul>
+  </div>
+  <div class="section-container tall tabbed">
+    <div id="RoutingStatic" class="wide tall"></div>
+    <div id="RoutingDynamic" class="wide tall"></div>
+  </div>
+</div>
+
+<script id="RoutingStaticTemplate" type="text/template">
+    <div class="section-container table-container">
+      <div id="RoutingStaticRouteAdd" class="add">
+        <button type="button">Add Static Route</button>
+      </div>
+      <div id="RoutingStaticRouteFilters" class="filters">
+        <ul class="ui-tabs-buttonset">
+          <li class="all"><a href="#Routing/Static">All</a></li>
+          <li class="static"><a href="#Routing/Static/filter/static">Static</a></li>
+          <li class="connected"><a href="#Routing/Static/filter/connected">Connected</a></li>
+          <li class="rip"><a href="#Routing/Static/filter/rip">RIP</a></li>
+          <li class="ospf"><a href="#Routing/Static/filter/ospf">OSPF</a></li>
+        </ul>
+      </div>
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Selected</th>
+          <th>Description</th>
+          <th>Destination</th>
+          <th>Next Hop</th>
+          <th>Interface</th>
+          <th>Route Type</th>
+          <th>in FIB</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+</script>
+
+<script id="RoutingStaticCreateTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary" for="type<%= id %>">Select Route Type</label>
+            <div>
+              <select name="type" id="type<%= id %>">
+                <option value="gateway">Gateway</option>
+                <option value="interface">Interface</option>
+                <option value="blackhole">Black Hole</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset class="primary spaced">
+            <label class="primary required" for="destination<%= id %>">Destination network</label>
+            <div>
+              <input type="text" id="destination<%= id %>" name="destination" class="text-input"
+                     data-infotip="IPv4 network with prefix<br /><br />Example: <b>192.0.2.0/24</b>"/>
+            </div>
+
+            <div class="swapped gateway">
+              <label class="primary required" for="gateway<%= id %>">Next hop address</label>
+              <div>
+                <input type="text" id="gateway<%= id %>" name="gateway" class="text-input"
+                       data-infotip="IPv4 address of next hop router<br /><br />Example: <b>192.0.2.1</b>"/>
+              </div>
+            </div>
+
+            <div class="swapped interface">
+              <label class="primary required" for="interface<%= id %>">Next hop interface</label>
+              <div>
+                <select id="interface<%= id %>" name="interface"></select>
+              </div>
+            </div>
+
+            <label class="primary" for="description<%= id %>">Description</label>
+            <div>
+              <input type="text" id="description<%= id %>" name="description" class="text-input"/>
+            </div>
+
+            <label class="primary" for="distance<%= id %>">Distance (1-255)</label>
+            <div>
+              <input type="text" id="distance<%= id %>" name="distance" class="text-input"/>
+            </div>
+
+            <label class="primary" for="enabled<%= id %>">Enable</label>
+            <div>
+              <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input"
+                     checked="true"/>
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="RoutingStaticConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary">Route type</label>
+            <div class="readonly"><%= type %></div>
+
+            <label class="primary">Destination network</label>
+            <div class="readonly"><%= destination %></div>
+          </fieldset>
+
+          <fieldset class="primary spaced">
+            <div class="swapped gateway">
+              <label class="primary">Next hop address</label>
+              <div class="readonly"><%= nexthop %></div>
+            </div>
+
+            <div class="swapped interface">
+              <label class="primary">Next hop interface</label>
+              <div class="readonly"><%= nexthop %></div>
+            </div>
+
+            <label class="primary" for="description<%= id %>">Description</label>
+            <div>
+              <input type="text" id="description<%= id %>" name="description" class="text-input"/>
+            </div>
+
+            <label class="primary" for="distance<%= id %>">Distance (1-255)</label>
+            <div>
+              <input type="text" id="distance<%= id %>" name="distance" class="text-input"/>
+            </div>
+
+            <label class="primary" for="enabled<%= id %>">Enable</label>
+            <div>
+              <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input"/>
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="RoutingDynamicTemplate" type="text/template">
+  <div id="RoutingDynamicSettings" class="ui-layout-north">
+    <form method="post" class="ui-form">
+      <fieldset class="router">
+        <legend>Router</legend>
+
+        <label class="primary" for="router-id">Router ID:</label>
+        <div>
+          <input type="text" id="router-id" name="router-id" class="text-input"
+                 data-infotip="Override the default route ID (IPv4 address)"/>
+        </div>
+      </fieldset>
+
+      <fieldset class="redistribution">
+        <legend>Redistribution</legend>
+
+        <div class="section">
+          <label class="primary" for="redist-connected">Redistribute connected:</label>
+          <div>
+            <input type="checkbox" id="redist-connected" name="redist-connected" class="text-input" value="1"
+                   class="check-box-input"/>
+          </div>
+
+          <label class="primary" for="redist-connected-metric">Metric:</label>
+          <div>
+            <input type="text" id="redist-connected-metric" name="redist-connected-metric" class="text-input"/>
+          </div>
+        </div>
+
+        <div class="section">
+          <label class="primary" for="redist-static">Redistribute static:</label>
+          <div>
+            <input type="checkbox" id="redist-static" name="redist-static" class="text-input check-box-input" value="1" />
+          </div>
+
+          <label class="primary" for="redist-static-metric">Metric:</label>
+          <div>
+            <input type="text" id="redist-static-metric" name="redist-static-metric" class="text-input"/>
+          </div>
+        </div>
+
+        <div class="section">
+          <label class="primary" for="default-orig">Announce default route:</label>
+          <div>
+            <input type="checkbox" id="default-orig" name="default-orig" class="text-input check-box-input" value="1" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="actions">
+        <div>
+          <button type="submit">Save</button>
+        </div>
+        <div class="delete">
+          <button type="button">Delete OSPF</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+  <div id="RoutingDynamicLists" class="ui-layout-center">
+    <div id="RoutingDynamicAreas" class="ui-layout-center"></div>
+    <div id="RoutingDynamicInterfaces" class="ui-layout-east"></div>
+  </div>
+</script>
+
+<script id="RoutingDynamicAreasTemplate" type="text/template">
+  <div class="section-title">Areas</div>
+  <div class="section-container">
+    <div id="RoutingDynamicAreasAdd" class="add">
+      <button type="button">Add Area</button>
+    </div>
+    <div id="AreaFilters" class="filters"></div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Area ID</th>
+        <th>Area Type</th>
+        <th>Auth Type</th>
+        <th>Network</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="RoutingDynamicAreaCreateTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="id<%= id %>">Area ID</label>
+            <div>
+              <input type="text" id="id<%= id %>" name="id" class="text-input"
+                     data-infotip="OSPF area in decimal or dotted decimal notation<br /><br />Example: <b>0.0.0.0</b>"/>
+            </div>
+
+            <label class="primary required" for="areatype<%= id %>">Area Type</label>
+            <div>
+              <select name="areatype" id="areatype<%= id %>">
+                <option value="">- select -</option>
+                <option value="normal" selected="selected">Normal/sec</option>
+                <option value="nssa">NSSA</option>
+                <option value="stub">Stub</option>
+              </select>
+            </div>
+
+            <label class="primary" for="authentication<%= id %>">Auth Type</label>
+            <div>
+              <select name="authentication" id="authentication<%= id %>">
+                <option value="">Off</option>
+                <option value="md5">MD5/sec</option>
+                <option value="plaintext-password">Plain text</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset class="primary network">
+            <legend class="primary required" data-field="network">Network</legend>
+
+            <ul>
+              <li><input type="text" class="text-input validate-network network-member"
+                         data-infotip="IPv4 network with prefix<br /><br />Example: <b>192.0.2.0/24</b>"/></li>
+            </ul>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="RoutingDynamicAreaConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary" for="id<%= id %>">Area ID</label>
+            <div class="readonly"><%= areaid %></div>
+
+            <label class="primary required" for="areatype<%= id %>">Area Type</label>
+            <div>
+              <select name="areatype" id="areatype<%= id %>">
+                <option value="">- select -</option>
+                <option value="normal">Normal/sec</option>
+                <option value="nssa">NSSA</option>
+                <option value="stub">Stub</option>
+              </select>
+            </div>
+
+            <label class="primary" for="authentication<%= id %>">Auth Type</label>
+            <div>
+              <select name="authentication" id="authentication<%= id %>">
+                <option value="">Off</option>
+                <option value="md5">MD5/sec</option>
+                <option value="plaintext-password">Plain text</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset class="primary network">
+            <legend class="primary required" data-field="network">Network</legend>
+
+            <ul>
+              <li><input type="text" class="text-input validate-network network-member"
+                         data-infotip="IPv4 network with prefix<br /><br />Example: <b>192.0.2.0/24</b>"/></li>
+            </ul>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="RoutingDynamicInterfacesTemplate" type="text/template">
+  <div class="section-title">Interfaces</div>
+  <div class="section-container">
+    <div id="RoutingDynamicInterfacesAdd" class="add">
+      <button type="button">Add OSPF Interface</button>
+    </div>
+    <div id="InterfaceFilters" class="filters"></div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Interface</th>
+        <th>Cost</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="RoutingDynamicInterfaceConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="interface<%= id %>">Interface</label>
+            <div>
+              <select name="interface" id="interface<%= id %>">
+                <option value="">- select -</option>
+              </select>
+            </div>
+
+            <label class="primary" for="authentication<%= id %>">Auth Type</label>
+            <div>
+              <select name="authentication" id="authentication<%= id %>">
+                <option value="">Off</option>
+                <option value="md5">MD5/sec</option>
+                <option value="plaintext-password">Plain text</option>
+              </select>
+            </div>
+
+            <label class="primary" for="authkey<%= id %>">Auth Key</label>
+            <div>
+              <input type="text" id="authkey<%= id %>" name="authkey" class="text-input"/>
+            </div>
+
+            <label class="primary" for="cost<%= id %>">Cost</label>
+            <div>
+              <input type="text" id="cost<%= id %>" name="cost" class="text-input"/>
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="RoutingStaticDropDownButtonTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+    <li><a class="action-status" href="#"></a></li>
+  </ul>
+</script>
+
+<script id="RoutingDynamicAreaDropDownButtonTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<script id="RoutingDynamicInterfaceDropDownButtonTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<!-- End: Routing -->

@@ -1,0 +1,503 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx='traffic-control advanced-queue'
+cli=cli-shell-api
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+
+get_data () {
+    local var=$1
+    local exp=$2
+    local val=$(cat $INPUT | jq "$exp" 2>/dev/null)
+    eval "$var=$val"
+}
+
+get_rdata () {
+    local var=$1
+    local ridx=$2
+    local exp=".\"bq-config\"[$ridx].\"$var\""
+    local val=$(cat $INPUT | jq "$exp" 2>/dev/null)
+    eval "$var=$val"
+}
+
+get_data2 () {
+    local var=$1
+    local exp=$2
+    local val=$(cat $INPUT | jq "$exp" | sed 's/\$/\\$/g;s/`/\\`/g' 2>/dev/null)
+    eval "$var=$val"
+}
+
+get_data_array () {
+    local var=$1
+    local exp=$2
+    local val=$(cat $INPUT | jq "$exp" 2>/dev/null)
+    eval "$var=($val)"
+}
+
+G_RET=0
+CFG_CMD=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+
+do_cmd () {
+    $CFG_CMD "$@" || G_RET=1
+}
+
+empty () {
+    [ -z "$1" ] || [ "$1" == null ]
+}
+
+ROOT_Q=1023
+ROOT_Q_DESC=UBNT-BQ
+Q_FQCODEL=UBNT_BQ_FQ_CODEL
+Q_SFQ=UBNT_BQ_SFQ
+Q_FIFO=UBNT_BQ_FIFO
+Q_HFQ=UBNT_BQ_HFQ
+q_sfq=''
+q_fifo=''
+q_fqcodel=''
+q_hfq=0
+
+add_qtype () {
+    local out=$1
+    local qt=$2
+    local h_brate=$3
+    local h_bsize=$4
+    local h_id=$5
+    local h_max=$6
+    local h_subnet=$7
+
+    if [ "$qt" == 'sfq' ]; then
+        if [ -z "$q_sfq" ]; then
+            q_sfq=yes
+            do_cmd set $pfx queue-type sfq $Q_SFQ
+        fi
+        eval "$out=$Q_SFQ"
+        return
+    fi
+
+    if [ "$qt" == 'pfifo' ]; then
+        if [ -z "$q_fifo" ]; then
+            q_fifo=yes
+            do_cmd set $pfx queue-type pfifo $Q_FIFO
+        fi
+        eval "$out=$Q_FIFO"
+        return
+    fi
+
+    if [ "$qt" == 'fq-codel' ]; then
+        if [ -z "$q_fqcodel" ]; then
+            q_fqcodel=yes
+            do_cmd set $pfx queue-type fq-codel $Q_FQCODEL
+        fi
+        eval "$out=$Q_FQCODEL"
+        return
+    fi
+
+    [ "$qt" != hfq ] && return
+    [ -z "$h_subnet" ] && return
+
+    (( ++q_hfq ))
+    local qn="${Q_HFQ}$q_hfq"
+    do_cmd set $pfx queue-type hfq $qn subnet $h_subnet
+    [ -n "$h_brate" ] \
+        && do_cmd set $pfx queue-type hfq $qn burst burst-rate ${h_brate}
+    [ -n "$h_bsize" ] \
+        && do_cmd set $pfx queue-type hfq $qn burst burst-size $h_bsize
+    [ -n "$h_id" ] \
+        && do_cmd set $pfx queue-type hfq $qn host-identifier $h_id
+    [ -n "$h_max" ] \
+        && do_cmd set $pfx queue-type hfq $qn max-rate ${h_max}
+    eval "$out=$qn"
+}
+
+apply () {
+    local ret=0
+    declare src dest app app_custom rate brate bsize r_rate r_brate r_bsize
+    declare qtype hfq_brate hfq_bsize hfq_id hfq_max hfq_subnet
+    declare r_qtype r_hfq_brate r_hfq_bsize r_hfq_id r_hfq_max r_hfq_subnet
+    declare cl1 cl2 pfx1 pfx2
+
+    tfile=$(mktemp)
+    (
+    G_RET=0
+    do_cmd begin
+    do_cmd delete $pfx >/dev/null 2>&1
+    do_cmd set $pfx root queue $ROOT_Q attach-to global
+    do_cmd set $pfx root queue $ROOT_Q bandwidth 1000mbit
+    do_cmd set $pfx root queue $ROOT_Q description $ROOT_Q_DESC
+
+    for ((idx = 0; ; idx++)); do
+        ((cl1 = idx * 2 + 1))
+        ((cl2 = cl1 + 1))
+        get_rdata rate $idx
+        get_rdata r_rate $idx
+        if empty "$rate" && empty "$r_rate"; then
+            break
+        fi
+
+        get_rdata src $idx
+        get_rdata dest $idx
+        get_rdata app $idx
+        get_rdata app_custom $idx
+        get_rdata brate $idx
+        get_rdata bsize $idx
+        get_rdata r_brate $idx
+        get_rdata r_bsize $idx
+        get_rdata qtype $idx
+        get_rdata hfq_brate $idx
+        get_rdata hfq_bsize $idx
+        get_rdata hfq_id $idx
+        get_rdata hfq_max $idx
+        get_rdata hfq_subnet $idx
+        get_rdata r_qtype $idx
+        get_rdata r_hfq_brate $idx
+        get_rdata r_hfq_bsize $idx
+        get_rdata r_hfq_id $idx
+        get_rdata r_hfq_max $idx
+        get_rdata r_hfq_subnet $idx
+
+        qname=''
+        rqname=''
+        add_qtype qname "$qtype" "$hfq_brate" "$hfq_bsize" "$hfq_id" \
+                  "$hfq_max" "$hfq_subnet"
+        add_qtype rqname "$r_qtype" "$r_hfq_brate" "$r_hfq_bsize" "$r_hfq_id" \
+                  "$r_hfq_max" "$r_hfq_subnet"
+        [ $G_RET == 0 ] || break
+
+        if ! empty "$rate"; then
+            pfx1="$pfx leaf queue $cl1"
+            do_cmd set $pfx1 parent $ROOT_Q
+            do_cmd set $pfx1 bandwidth ${rate}
+            [ -n "$brate" ] \
+                && do_cmd set $pfx1 burst burst-rate ${brate}
+            [ -n "$bsize" ] \
+                && do_cmd set $pfx1 burst burst-size ${bsize}
+            [ -n "$qname" ] \
+                && do_cmd set $pfx1 queue-type $qname
+            [ $G_RET == 0 ] || break
+
+            pfx1="$pfx filters match $cl1"
+            do_cmd set $pfx1 attach-to $ROOT_Q
+            do_cmd set $pfx1 target $cl1
+            [ -n "$src" ] \
+                && do_cmd set $pfx1 ip source address $src
+            [ -n "$dest" ] \
+                && do_cmd set $pfx1 ip destination address $dest
+            [ -n "$app" ] \
+                && do_cmd set $pfx1 application category $app
+            [ -n "$app_custom" ] \
+                && do_cmd set $pfx1 application custom-category $app_custom
+            [ $G_RET == 0 ] || break
+        fi
+
+        if ! empty "$r_rate"; then
+            pfx2="$pfx leaf queue $cl2"
+            do_cmd set $pfx2 parent $ROOT_Q
+            do_cmd set $pfx2 bandwidth ${r_rate}
+            [ -n "$r_brate" ] \
+                && do_cmd set $pfx2 burst burst-rate ${r_brate}
+            [ -n "$r_bsize" ] \
+                && do_cmd set $pfx2 burst burst-size ${r_bsize}
+            [ -n "$rqname" ] \
+                && do_cmd set $pfx2 queue-type $rqname
+            [ $G_RET == 0 ] || break
+
+            pfx2="$pfx filters match $cl2"
+            do_cmd set $pfx2 attach-to $ROOT_Q
+            do_cmd set $pfx2 target $cl2
+            [ -n "$src" ] \
+                && do_cmd set $pfx2 ip destination address $src
+            [ -n "$dest" ] \
+                && do_cmd set $pfx2 ip source address $dest
+            [ -n "$app" ] \
+                && do_cmd set $pfx2 application category $app
+            [ -n "$app_custom" ] \
+                && do_cmd set $pfx2 application custom-category $app_custom
+            [ $G_RET == 0 ] || break
+        fi
+    done
+
+    [ $G_RET == 0 ] && do_cmd commit
+    [ $G_RET == 0 ] && do_cmd save
+    do_cmd end
+    exit $G_RET
+    ) >$tfile 2>&1
+    ret=$?
+
+    local output=$(cat $tfile | jenc)
+    rm -f $tfile
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\":$output}"
+    fi
+}
+
+cfg_nodes () {
+    local out=$1
+    local path=$2
+    local tmp=$($cli listActiveNodes $path)
+    eval "$out=($tmp)"
+}
+
+cfg_val () {
+    local out=$1
+    local path=$2
+    local tmp=$($cli returnActiveValue $path)
+    eval "$out=$tmp"
+}
+
+fail_load () {
+    echo '{"success":"0","data":{"bq-config":[]}}'
+    exit 0
+}
+
+declare -A c_qtypes
+
+load () {
+    cfg_nodes c_roots "$pfx root queue"
+    if [ "${#c_roots[@]}" != 1 ] || [ "${c_roots[0]}" != $ROOT_Q ]; then
+        fail_load
+    fi
+    cfg_val c_root_desc "$pfx root queue $ROOT_Q description"
+    cfg_val c_root_def "$pfx root queue $ROOT_Q default"
+    cfg_val c_root_at "$pfx root queue $ROOT_Q attach-to"
+    cfg_val c_root_bw "$pfx root queue $ROOT_Q bandwidth"
+    if [ "$c_root_desc" != $ROOT_Q_DESC ] || [ -n "$c_root_def" ] \
+            || [ $c_root_at != global ] || [ $c_root_bw != 1000mbit ]; then
+        fail_load
+    fi
+
+    cfg_nodes c_qnames "$pfx queue-type fq-codel"
+    if (( ${#c_qnames[@]} > 0 )); then
+        if [ ${#c_qnames[@]} != 1 ] || [ "${c_qnames[0]}" != $Q_FQCODEL ]; then
+            fail_load
+        fi
+        c_qtypes[$Q_FQCODEL]='fq-codel'
+    fi
+
+    cfg_nodes c_qnames "$pfx queue-type pfifo"
+    if (( ${#c_qnames[@]} > 0 )); then
+        if [ ${#c_qnames[@]} != 1 ] || [ "${c_qnames[0]}" != $Q_FIFO ]; then
+            fail_load
+        fi
+        c_qtypes[$Q_FIFO]='pfifo'
+    fi
+
+    cfg_nodes c_qnames "$pfx queue-type sfq"
+    if (( ${#c_qnames[@]} > 0 )); then
+        if [ ${#c_qnames[@]} != 1 ] || [ "${c_qnames[0]}" != $Q_SFQ ]; then
+            fail_load
+        fi
+        c_qtypes[$Q_SFQ]='sfq'
+    fi
+
+    cfg_nodes c_qnames "$pfx queue-type hfq"
+    if (( ${#c_qnames[@]} > 0 )); then
+        local qn
+        for qn in "${c_qnames[@]}"; do
+            if [[ $qn != $Q_HFQ* ]]; then
+                fail_load
+            fi
+            cfg_val c_hfq_net "$pfx queue-type hfq $qn subnet"
+            cfg_val c_hfq_max "$pfx queue-type hfq $qn max-rate"
+            cfg_val c_hfq_id "$pfx queue-type hfq $qn host-identifier"
+            cfg_val c_hfq_brate "$pfx queue-type hfq $qn burst burst-rate"
+            cfg_val c_hfq_bsize "$pfx queue-type hfq $qn burst burst-size"
+            c_qtypes[$qn]=hfq" \"$c_hfq_net\" \"$c_hfq_max\" \"$c_hfq_id\" \"$c_hfq_brate\" \"$c_hfq_bsize\""
+        done
+    fi
+
+    cfg_nodes c_leaves "$pfx leaf queue"
+    cfg_nodes c_filters "$pfx filters match"
+    if [ "${c_leaves[*]}" != "${c_filters[*]}" ]; then
+        fail_load
+    fi
+
+    local output='['
+    declare cl1 cl2 pfx1 pfx2
+    local i=0
+    local idx=1
+    while (( i < ${#c_leaves[@]} )); do
+        ((cl1 = idx))
+        ((cl2 = cl1 + 1))
+        c1_l_p=''
+        c1_l_q=''
+        c1_l_rate=''
+        c1_l_brate=''
+        c1_l_bsize=''
+        c1_f_a=''
+        c1_f_t=''
+        c1_f_app=''
+        c1_f_appc=''
+        c1_f_s=''
+        c1_f_d=''
+        if [ $cl1 == ${c_leaves[$i]} ]; then
+            pfx1="$pfx leaf queue $cl1"
+            cfg_val c1_l_p "$pfx1 parent"
+            cfg_val c1_l_q "$pfx1 queue-type"
+            cfg_val c1_l_rate "$pfx1 bandwidth"
+            cfg_val c1_l_brate "$pfx1 burst burst-rate"
+            cfg_val c1_l_bsize "$pfx1 burst burst-size"
+
+            pfx1="$pfx filters match $cl1"
+            cfg_val c1_f_a "$pfx1 attach-to"
+            cfg_val c1_f_t "$pfx1 target"
+            cfg_val c1_f_app "$pfx1 application category"
+            cfg_val c1_f_appc "$pfx1 application custom-category"
+            cfg_val c1_f_s "$pfx1 ip source address"
+            cfg_val c1_f_d "$pfx1 ip destination address"
+
+            ((i++))
+        elif [ $cl2 != ${c_leaves[$i]} ]; then
+            fail_load
+        else
+            cl1=''
+        fi
+
+        c2_l_p=''
+        c2_l_q=''
+        c2_l_rate=''
+        c2_l_brate=''
+        c2_l_bsize=''
+        c2_f_a=''
+        c2_f_t=''
+        c2_f_app=''
+        c2_f_appc=''
+        c2_f_s=''
+        c2_f_d=''
+        if (( $i < ${#c_leaves[@]} )); then
+            if [ $cl2 == ${c_leaves[$i]} ]; then
+                pfx2="$pfx leaf queue $cl2"
+                cfg_val c2_l_p "$pfx2 parent"
+                cfg_val c2_l_q "$pfx2 queue-type"
+                cfg_val c2_l_rate "$pfx2 bandwidth"
+                cfg_val c2_l_brate "$pfx2 burst burst-rate"
+                cfg_val c2_l_bsize "$pfx2 burst burst-size"
+
+                pfx2="$pfx filters match $cl2"
+                cfg_val c2_f_a "$pfx2 attach-to"
+                cfg_val c2_f_t "$pfx2 target"
+                cfg_val c2_f_app "$pfx2 application category"
+                cfg_val c2_f_appc "$pfx2 application custom-category"
+                cfg_val c2_f_s "$pfx2 ip source address"
+                cfg_val c2_f_d "$pfx2 ip destination address"
+
+                ((i++))
+            elif [ -z "$cl1" ]; then
+                fail_load
+            else
+                cl2=''
+            fi
+        else
+            cl2=''
+        fi
+
+        if [ -n "$cl1" ] && [ -n "$cl2" ]; then
+            if [ "$c1_f_app" != "$c2_f_app" ] \
+                    || [ "$c1_f_appc" != "$c2_f_appc" ] \
+                    || [ "$c1_f_s" != "$c2_f_d" ] \
+                    || [ "$c1_f_d" != "$c2_f_s" ]; then
+                fail_load
+            fi
+        fi
+
+        if [ -z "$cl1" ]; then
+            c1_f_app=$c2_f_app
+            c1_f_appc=$c2_f_appc
+            c1_f_s=$c2_f_d
+            c1_f_d=$c2_f_s
+        fi
+
+        c1_l_qtype=''
+        c1_hfq_subnet=''
+        c1_hfq_max=''
+        c1_hfq_id=''
+        c1_hfq_brate=''
+        c1_hfq_bsize=''
+        if [ -n "$cl1" ]; then
+            if [ $c1_l_p != $ROOT_Q ] || [ -z "${c_qtypes[$c1_l_q]}" ] \
+                    || [ $c1_f_a != $ROOT_Q ] || [ $c1_f_t != $cl1 ]; then
+                fail_load
+            fi
+
+            local tmp="${c_qtypes[$c1_l_q]}"
+            local -a tmps
+            eval "tmps=($tmp)"
+            c1_l_qtype="${tmps[0]}"
+            if [ "$c1_l_qtype" == hfq ]; then
+                c1_hfq_subnet="${tmps[1]}"
+                c1_hfq_max="${tmps[2]}"
+                c1_hfq_id="${tmps[3]}"
+                c1_hfq_brate="${tmps[4]}"
+                c1_hfq_bsize="${tmps[5]}"
+            fi
+        fi
+
+        c2_l_qtype=''
+        c2_hfq_subnet=''
+        c2_hfq_max=''
+        c2_hfq_id=''
+        c2_hfq_brate=''
+        c2_hfq_bsize=''
+        if [ -n "$cl2" ]; then
+            if [ $c2_l_p != $ROOT_Q ] || [ -z "${c_qtypes[$c2_l_q]}" ] \
+                    || [ $c2_f_a != $ROOT_Q ] || [ $c2_f_t != $cl2 ]; then
+                fail_load
+            fi
+
+            local tmp="${c_qtypes[$c2_l_q]}"
+            local -a tmps
+            eval "tmps=($tmp)"
+            c2_l_qtype="${tmps[0]}"
+            if [ "$c2_l_qtype" == hfq ]; then
+                c2_hfq_subnet="${tmps[1]}"
+                c2_hfq_max="${tmps[2]}"
+                c2_hfq_id="${tmps[3]}"
+                c2_hfq_brate="${tmps[4]}"
+                c2_hfq_bsize="${tmps[5]}"
+            fi
+        fi
+
+        if (( idx > 1 )); then
+            output+=','
+        fi
+        output+="{\"src\":\"$c1_f_s\","
+        output+="\"dest\":\"$c1_f_d\","
+        output+="\"app\":\"$c1_f_app\","
+        output+="\"app_custom\":\"$c1_f_appc\","
+        output+="\"rate\":\"$c1_l_rate\","
+        output+="\"brate\":\"$c1_l_brate\","
+        output+="\"bsize\":\"$c1_l_bsize\","
+        output+="\"r_rate\":\"$c2_l_rate\","
+        output+="\"r_brate\":\"$c2_l_brate\","
+        output+="\"r_bsize\":\"$c2_l_bsize\","
+        output+="\"qtype\":\"$c1_l_qtype\","
+        output+="\"hfq_brate\":\"$c1_hfq_brate\","
+        output+="\"hfq_bsize\":\"$c1_hfq_bsize\","
+        output+="\"hfq_id\":\"$c1_hfq_id\","
+        output+="\"hfq_max\":\"$c1_hfq_max\","
+        output+="\"hfq_subnet\":\"$c1_hfq_subnet\","
+        output+="\"r_qtype\":\"$c2_l_qtype\","
+        output+="\"r_hfq_brate\":\"$c2_hfq_brate\","
+        output+="\"r_hfq_bsize\":\"$c2_hfq_bsize\","
+        output+="\"r_hfq_id\":\"$c2_hfq_id\","
+        output+="\"r_hfq_max\":\"$c2_hfq_max\","
+        output+="\"r_hfq_subnet\":\"$c2_hfq_subnet\"}"
+
+        ((idx += 2))
+    done
+    output+=']'
+    echo "{\"success\":\"1\",\"data\":{\"bq-config\":$output}}"
+}
+
+case "$ACTION" in
+    apply)
+        apply
+        ;;
+    load)
+        load
+        ;;
+esac

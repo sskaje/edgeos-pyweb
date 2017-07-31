@@ -1,0 +1,86 @@
+{
+    "rules": {
+		"eth0-static-address": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth0-static-mask": {
+			"required": true,
+			"ipv4maskOrPfx": 1
+		},
+		"eth0-static-gateway": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth0-static-dns": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth0-pppoe-userid": {
+			"required": true,
+			"noQuotes": 1
+		},
+		"eth0-pppoe-password": {
+			"required": true,
+			"noQuotes": 1
+		},
+        "eth0-number-vlan": {
+            "required": true,
+            "range": [0, 4094]
+        },
+		"eth1-static-address": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth1-static-mask": {
+			"required": true,
+			"ipv4maskOrPfx": 1
+		},
+		"eth2-static-address": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth2-static-mask": {
+			"required": true,
+			"ipv4maskOrPfx": 1
+		},
+		"br-static-address": {
+			"required": true,
+			"ipv4": 1
+		},
+		"br-static-mask": {
+			"required": true,
+			"ipv4maskOrPfx": 1
+		},
+        "ubnt-password": {
+            "required": true,
+            "minlength": 4,
+            "noQuotes": 1
+        },
+        "ubnt-confirm-password": {
+            "required": true,
+            "noQuotes": 1,
+            "minlength": 4,
+            "equalTo": "[name=ubnt-password]"
+        },
+        "new-user": {
+            "required": true,
+            "noWhiteSpace": true,
+            "noshellpunctuation": true,
+            "minlength": 2,
+            "maxlength": 32,
+            "validUserId": true
+        },
+        "new-password": {
+            "required": true,
+            "minlength": 4,
+            "noQuotes": 1
+        },
+        "new-confirm-password": {
+            "required": true,
+            "noQuotes": 1,
+            "minlength": 4,
+            "equalTo": "[name=new-password]"
+        }
+	}
+}

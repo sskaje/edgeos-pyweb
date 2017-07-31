@@ -1,0 +1,224 @@
+<!-- Start: Dashboard -->
+<div id="Dashboard" class="main-section">
+  <div class="section-container tall"></div>
+</div>
+
+<script id="DashboardDefaultTemplate" type="text/template">
+  <div id="DashboardStats" class="ui-layout-west"></div>
+  <div id="DashboardInner" class="ui-layout-center">
+    <div id="DashboardGraphs" class="ui-layout-north"></div>
+    <div id="DashboardInterfaces" class="ui-layout-center"></div>
+  </div>
+</script>
+
+<script id="DashboardStatsTemplate" type="text/template">
+  <div id="DashboardHardware"></div>
+  <div id="DashboardServices"></div>
+</script>
+
+<script id="DashboardHardwareTemplate" type="text/template">
+  <div class="section-title">Hardware</div>
+  <div class="section-container hardware services">
+    <div class="hardware service">
+      <dl class="clearfix only-line">
+        <dt>Temperature</dt>
+        <dd class=<%= temperature ? temperature : '' %> ><%= temperature %></dd>
+      </dl>
+    </div>
+    <div class="hardware service">
+      <div class="title">Power</div>
+      <dl class="clearfix">
+        \<% if (_.isEmpty(power)) { %>
+          \<% _.each(EDGE.PowerDefault, function(v, k) { %>
+            <dt><%= k %></dt>
+            <dd><%= v %></dd>
+          \<% }); %>
+        \<% } else { %>
+          \<% _.each(power, function(v, k) { %>
+            <dt><%= k %></dt>
+            <dd><%= v %></dd>
+          \<% }); %>
+        \<% } %>
+      </dl>
+    </div>
+  </div>
+</script>
+
+<script id="DashboardHardwarePort9Template" type="text/template">
+  <div class="section-title">Hardware</div>
+  <div class="section-container hardware services">
+    <div class="hardware service">
+      <div class="title">Temperature</div>
+      <dl class="clearfix">
+        \<% _.each(temperature, function(v, k) { %>
+          <dt><%= k %></dt>
+          <dd><%= v %></dd>
+        \<% }); %>
+      </dl>
+    </div>
+    \<% if (typeof power_slot !== 'undefined') { %>
+      <div class="hardware service">
+        <div class="title">Power Slot</div>
+        <dl class="clearfix">
+        \<% _.each(power_slot, function(v, k) { %>
+          <dt><%= k %></dt>
+          <dd><%= v %></dd>
+        \<% }); %>
+        </dl>
+      </div>
+    \<% } %>
+    <div class="hardware service">
+      <div class="title">Power</div>
+      <dl class="clearfix">
+        \<% _.each(power, function(v, k) { %>
+          <dt><%= k %></dt>
+          <dd><%= v %></dd>
+        \<% }); %>
+      </dl>
+    </div>
+    <div class="hardware service">
+      <div class="title">Fan</div>
+      <dl class="clearfix">
+        \<% _.each(fan, function(v, k) { %>
+          <dt><%= k %></dt>
+          <dd><%= v %></dd>
+        \<% }); %>
+      </dl>
+    </div>
+  </div>
+</script>
+
+<script id="DashboardServicesTemplate" type="text/template">
+  <div class="section-title">Services</div>
+  <div class="section-container services">
+    <div class="service routing">
+      <div class="title"><a href="#Routing/Static">Routes</a></div>
+      <dl class="clearfix">
+        <dt>connected</dt>
+        <dd><%= routesConnected %></dd>
+
+        <dt>static</dt>
+        <dd><%= routesStatic %></dd>
+
+        <dt>rip</dt>
+        <dd><%= routesRip %></dd>
+
+        <dt>ospf</dt>
+        <dd><%= routesOspf %></dd>
+
+        <dt>bgp</dt>
+        <dd><%= routesBGP %></dd>
+
+        <dt>total</dt>
+        <dd><%= routesTotal %></dd>
+      </dl>
+    </div>
+
+    <div class="service ospf">
+      <div class="title"><a href="#Routing/Dynamic">OSPF</a> is <%= ospfStatus %>
+        <em><%= ospfRouterId %></em>
+      </div>
+      <dl class="clearfix">
+        <dt>areas</dt>
+        <dd><%= ospfAreas %></dd>
+      </dl>
+    </div>
+
+    <div class="service nat">
+      <div class="title"><a href="#Security/NAT">NAT</a> is <%= natStatus %></div>
+      <dl class="clearfix">
+        <dt>rules</dt>
+        <dd><%= natRules %></dd>
+      </dl>
+    </div>
+
+    <div class="service firewall">
+      <div class="title"><a href="#Security/Firewall/Policies">Firewall</a> is <%= firewallStatus %></div>
+      <dl class="clearfix">
+        <dt>rulesets</dt>
+        <dd><%= firewallRulesets %></dd>
+
+        <dt>rules</dt>
+        <dd><%= firewallRules %></dd>
+      </dl>
+    </div>
+
+    <div class="service dhcp">
+      <div class="title"><a href="#Services/DHCP/Server">DHCP</a> is <%= dhcpStatus %></div>
+      <dl class="clearfix">
+        <dt>active servers</dt>
+        <dd><%= dhcpActiveServers %></dd>
+
+        <dt>inactive servers</dt>
+        <dd><%= dhcpInactiveServers %></dd>
+      </dl>
+    </div>
+  </div>
+</script>
+
+<script id="DashboardGraphsD3Template" type="text/template">
+  <div class="section-title">
+    <div id="DashboardInterfacesTitle">
+      Interfaces <span class="ui-button-icon-secondary ui-icon ui-icon-triangle-1-s"></span>
+    </div>
+  </div>
+  <div class="section-container inactive">
+    <div id="DashboardGraphKey" class="ui-layout-west">
+      <div class="active"></div>
+      <div class="inactive"></div>
+    </div>
+    <div id="DashboardGraphRates" class="ui-layout-center">
+      <div id="DashboardGraphTx"></div>
+      <div id="DashboardGraphRx"></div>
+    </div>
+  </div>
+</script>
+
+<script id="DashboardGraphsD3OverlayTemplate" type="text/template">
+  <table>
+    <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
+      <th colspan="2">Current Rate</th>
+      <th colspan="2">Total Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    \<% _.each(ifaces, function(item) { %>
+      <tr>
+        <td class="color<% if (item.active) { print(' active') } %>">
+          <div style="background-color: <%- item.color ? item.color : 'transparent' %>"></div>
+        </td>
+        <td class="interface"><%- item.id %></td>
+        <td class="current-rate"><%- item.rate.amount %></td>
+        <td class="current-pct"><%- item.rate.pct %></td>
+        <td class="total-amount"><%- item.total.amount %></td>
+        <td class="total-pct"><%- item.total.pct %></td>
+      </tr>
+    \<% }); %>
+    </tbody>
+    </table>
+</script>
+
+<script id="DashboardInterfacesTemplate" type="text/template">
+  <div class="section-title">Interfaces</div>
+  <div class="section-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Interface</th>
+          <th>Type</th>
+          <th>IP Address</th>
+          <th>MTU</th>
+          <th>Tx</th>
+          <th>Rx</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+<!-- End: Dashboard -->

@@ -1,0 +1,177 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx="port-forward"
+rpfx="port-forward rule"
+cli=cli-shell-api
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+
+get_data () {
+    local var=$1
+    local exp=$2
+    local val=$(cat $INPUT | jq "$exp" 2>/dev/null)
+    eval "$var=$val"
+}
+
+get_data2 () {
+    local var=$1
+    local exp=$2
+    local val=$(cat $INPUT | jq "$exp" | sed 's/\$/\\$/g;s/`/\\`/g' 2>/dev/null)
+    eval "$var=$val"
+}
+
+get_data_array () {
+    local var=$1
+    local exp=$2
+    local val=$(cat $INPUT | jq "$exp" 2>/dev/null)
+    eval "$var=($val)"
+}
+
+apply () {
+    local ret=0
+    local output=''
+
+    get_data hairpin '."hairpin-nat"'
+    get_data wan '.wan'
+    get_data af '."auto-firewall"'
+    get_data_array lans '."lans-config"[].lan'
+
+    tfile=$(mktemp)
+    (
+    $cmd begin
+    ret=0
+    $cmd delete $pfx || ret=1
+
+    if [ -n "$wan" ]; then
+        if ! $cmd set $pfx wan-interface "$wan"; then
+            ret=1
+        fi
+    fi
+
+    if [ "$hairpin" == true ]; then
+        if ! $cmd set $pfx hairpin-nat enable; then
+            ret=1
+        fi
+    else
+        if ! $cmd set $pfx hairpin-nat disable; then
+            ret=1
+        fi
+    fi
+
+    if [ "$af" == true ]; then
+        if ! $cmd set $pfx auto-firewall enable; then
+            ret=1
+        fi
+    else
+        if ! $cmd set $pfx auto-firewall disable; then
+            ret=1
+        fi
+    fi
+
+    for lan in "${lans[@]}"; do
+        if [ -z "$lan" ] || [ "$lan" == null ]; then
+            continue
+        fi
+        if ! $cmd set $pfx lan-interface "$lan"; then
+            ret=1
+        fi
+    done
+
+    for ((i = 1; ; i++)); do
+        ((idx = i - 1))
+        rstr=".\"rules-config\"[$idx]"
+        get_data oport "$rstr.\"original-port\""
+        get_data faddr "$rstr.\"forward-to-address\""
+        get_data fport "$rstr.\"forward-to-port\""
+        get_data proto "$rstr.\"protocol\""
+        get_data2 desc "$rstr.\"description\""
+
+        if [ -z "$oport" ] || [ "$oport" == null ]; then
+            break
+        fi
+        if ! $cmd set $rpfx $i original-port "$oport"; then
+            ret=1
+            break
+        fi
+        if ! $cmd set $rpfx $i forward-to address "$faddr"; then
+            ret=1
+            break
+        fi
+        if [ -n "$fport" ] && [ "$fport" != null ]; then
+            if ! $cmd set $rpfx $i forward-to port "$fport"; then
+                ret=1
+                break
+            fi
+        fi
+        if ! $cmd set $rpfx $i protocol "$proto"; then
+            ret=1
+            break
+        fi
+        if ! $cmd set $rpfx $i description "$desc"; then
+            ret=1
+            break
+        fi
+    done
+
+    if [ $ret == 0 ]; then
+        $cmd commit || ret=1
+    fi
+    if [ $ret == 0 ]; then
+        $cmd save || ret=1
+    fi
+    $cmd end
+    exit $ret
+    ) >$tfile 2>&1
+    ret=$?
+
+    output=$(cat $tfile | jenc)
+    rm -f $tfile
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": $output}"
+    fi
+}
+
+delete () {
+    local ret=0
+    local output=''
+
+    tfile=$(mktemp)
+    (
+    $cmd begin
+    ret=0
+    $cmd delete $pfx || ret=1
+
+    if [ $ret == 0 ]; then
+        $cmd commit || ret=1
+    fi
+    if [ $ret == 0]; then
+        $cmd save || ret=1
+    fi
+    $cmd end
+    exit $ret
+    ) >$tfile 2>&1
+    ret=$?
+
+    output=$(cat $tfile | jenc)
+    rm -f $tfile
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": $output}"
+    fi
+}
+
+case "$ACTION" in
+    apply)
+        apply
+        ;;
+    delete)
+        delete
+        ;;
+esac

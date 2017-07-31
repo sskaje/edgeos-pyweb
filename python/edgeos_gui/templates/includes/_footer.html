@@ -1,0 +1,330 @@
+<div id="FooterPanel" class="closed unrendered">
+  <div class="footer-outer-container">
+    <div class="footer-inner-container">
+      <ul id="FooterNav" class="ui-alternate">
+        <li id="NavAlerts"><a href="#Alerts">Alerts</a>
+          <div class="alert-box"></div>
+        </li>
+        <li id="NavSystem"><a href="#System">System</a></li>
+      </ul>
+
+      <div class="ui-alternate">
+        <div class="panel-toggle"></div>
+      </div>
+
+      <div id="FooterPanels">
+        <div id="AlertsPanel" class="panel">
+          <div class="panel-outer-container">
+            <div class="panel-inner-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>&nbsp;</th>
+                    <th>Message</th>
+                    <th>Field</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="SystemPanel" class="panel">
+          <div class="panel-outer-container">
+            <div class="panel-inner-container">
+              <div class="content">
+                <form method="post" class="ui-form">
+                  <div class="basic">
+                    <div class="section">Basic Settings</div>
+
+                    <div id="SystemVersion" class="hidden">Currently running EdgeOS<span></span></div>
+                    <a href="#" id="EULALink">Ubiquiti License Agreement</a>
+                    <div>
+                      %if genuine:
+                      <img id="GenuineProduct" src="/media/global/genuine-product.png"/>
+                      %else:
+                      <span id="GenuineProduct">Initialization error A12</span>
+                      %end
+                    </div>
+
+                    <fieldset>
+                      <legend>Host Name</legend>
+
+                      <label class="primary" for="host-name">System host name:</label>
+                      <div class="input">
+                        <input type="text" id="host-name" name="host-name" class="text-input"/>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Time Zone</legend>
+                      <ul>
+                        <li><label class="primary" for="tz_utc"><input type="radio" id="tz_utc" name="tz_radio" value="utc" class="radio-input" /> Use Coordinated Universal Time (UTC)</label></li>
+                        <li><label class="primary" for="tz_set"><input type="radio" id="tz_set" name="tz_radio" value="set" class="radio-input" /> Time zone:</label>
+                          <div>
+                            <select id="tz_top" name="tz_top"></select>
+                            <select id="tz_co" name="tz_co"></select>
+                            <select id="tz_tz" name="tz_tz"></select>
+                          </div>
+                        </li>
+                      </ul>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Gateway</legend>
+
+                      <label class="primary" for="gateway">System gateway address:</label>
+                      <div class="input">
+                        <input type="text" id="gateway" name="gateway" class="text-input" />
+                      </div>
+                    </fieldset>
+
+                    <fieldset class="primary nameserver">
+                      <legend class="primary" data-field="nameserver">Name Server</legend>
+
+                      <label class="primary" for="nameserver">System name server:</label>
+                      <div class="input">
+                        <ul>
+                          <li><input type="text" class="text-input validate-ipv4OrIpv6Multi nameserver-member" /></li>
+                        </ul>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Domain Name</legend>
+
+                      <label class="primary" for="domain">System domain-name:</label>
+                      <div class="input">
+                        <input type="text" id="domain" name="domain" class="text-input" />
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>NTP</legend>
+
+                      <label class="primary" for="ntp-enabled">Automatically update system time using NTP</label>
+                      <div class="input">
+                        <input type="checkbox" id="ntp-enabled" name="ntp-enabled" class="text-input" value="1" class="check-box-input" />
+                      </div>
+                    </fieldset>
+                    %if gui_features.get('gpon_mtu_size'):
+                      <fieldset>
+                        <legend>MTU Size</legend>
+
+                        <label class="primary" for="gpon-mtu-size">MTU size:</label>
+                        <div class="input">
+                          <input type="text" id="gpon-mtu-size" name="gpon-mtu-size" class="text-input" />
+                        </div>
+                      </fieldset>
+                    %end
+                  </div>
+
+                  <div class="management">
+                    <div class="section spacer">Management Settings</div>
+
+                    <fieldset>
+                      <legend>SSH Server</legend>
+
+                      <label class="primary" for="ssh-enabled">Enable</label>
+                      <div class="input">
+                        <input type="checkbox" id="ssh-enabled" name="ssh-enabled" value="1" class="check-box-input" />
+                      </div>
+
+                      <label class="primary" for="ssh-port">Port:</label>
+                      <div class="input">
+                        <input type="text" id="ssh-port" name="ssh-port" class="text-input" />
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Telnet Server</legend>
+
+                      <label class="primary" for="tel-enabled">Enable</label>
+                      <div class="input">
+                        <input type="checkbox" id="tel-enabled" name="tel-enabled" value="1" class="check-box-input" />
+                      </div>
+
+                      <label class="primary" for="tel-port">Port:</label>
+                      <div class="input">
+                        <input type="text" id="tel-port" name="tel-port" class="text-input" />
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>UNMS Connection (beta)</legend>
+
+                      <label class="primary" for="unms-enabled">Enable</label>
+                      <div class="input">
+                        <input type="checkbox" id="unms-enabled" name="unms-enabled"
+                               value="1" class="check-box-input"/>
+                      </div>
+
+                      <label class="primary" for="unms-string">UNMS key</label>
+                      <div class="input">
+                        <input type="text" class="text-input" id="unms-string" name="unms-string"/>
+                      </div>
+
+                      <label class="primary" for="unms-connected">Connected</label>
+                      <div class="input">
+                        <input type="checkbox" class="check-box-input"
+                               name="unms-connected" id="unms-connected" disabled/>
+                      </div>
+
+                      <label class="primary" for="unms-last-connection">Last connected time</label>
+                      <div class="input">
+                        <input type="text" class="text-input" id="unms-last-connection"
+                               name="unms-last-connection" disabled/>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>SNMP Agent</legend>
+
+                      <label class="primary" for="snmp-enabled">Enable</label>
+                      <div class="input">
+                        <input type="checkbox" id="snmp-enabled"
+                         name="snmp-enabled" value="1" class="check-box-input" />
+                      </div>
+
+                      <label class="primary" for="snmp-comm">SNMP community:</label>
+                      <div class="input">
+                        <input type="text" id="snmp-comm" name="snmp-comm"
+                         class="text-input" />
+                      </div>
+
+                      <label class="primary" for="snmp-cont">Contact:</label>
+                      <div class="input">
+                        <input type="text" id="snmp-cont" name="snmp-cont"
+                         class="text-input" />
+                      </div>
+
+                      <label class="primary" for="snmp-loc">Location:</label>
+                      <div class="input">
+                        <input type="text" id="snmp-loc" name="snmp-loc"
+                         class="text-input" />
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>UBNT Discovery</legend>
+
+                      <label class="primary" for="discovery-enabled">Enable</label>
+                      <div class="input">
+                        <input type="checkbox" id="discovery-enabled"
+                         name="discovery-enabled" value="1" class="check-box-input" />
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>System Log</legend>
+
+                      <label class="primary" for="log-server">Log to remote server:</label>
+                      <div class="input">
+                        <input type="text" id="log-server" name="log-server" class="text-input" />
+                      </div>
+
+                      <label class="primary" for="log-level">Log Level:</label>
+                      <div class="input">
+                        <select id="log-level" name="log-level">
+                          <option value="emerg">Emergency</option>
+                          <option value="alert">Urgent</option>
+                          <option value="crit">Critical</option>
+                          <option value="err" selected>Error</option>
+                          <option value="warning">Warning</option>
+                          <option value="notice">Further Investigation</option>
+                          <option value="info">Informational</option>
+                          <option value="debug">Debug</option>
+                        </select>
+                      </div>
+                    </fieldset>
+                  </div>
+
+                  <div class="config">
+                    <div class="section spacer">Configuration Management &amp; Device Maintenance</div>
+
+                    <fieldset id="save-config">
+                      <legend>Back Up Config</legend>
+
+                      <label class="primary">Download backup config file:</label>
+                      <div class="input">
+                        <button type="button">Download</button>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Upgrade System Image</legend>
+
+                      <label class="primary">Upload system image:</label>
+                      <div id="system-upgrade"></div>
+
+                      <div class="tip">To check for updates go to: <a href="http://www.ubnt.com/download" target="_blank">www.ubnt.com/download</a></div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Restore Config</legend>
+
+                      <label class="primary">Upload config file:</label>
+                      <div id="system-config"></div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Reset Config to Default</legend>
+
+                      <div class="input">
+                        <button id="ResetButton" type="button">Reset to Default</button>
+                      </div>
+                    </fieldset>
+                  </div>
+                  <div class="power">
+                    <div class="section spacer">Restart &amp; Shut Down Router</div>
+
+                    <fieldset>
+                      <legend>Restart Router</legend>
+
+                      <div class="input">
+                        <button id="RestartButton" type="button">Restart</button>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Shut Down Router</legend>
+
+                      <div class="input">
+                        <button id="ShutDownButton" type="button">Shut Down</button>
+                      </div>
+                    </fieldset>
+                  </div>
+                  %if gui_features.get("support_file_download"):
+                    <div class="support">
+                      <div class="section spacer">Support</div>
+
+                      <fieldset>
+                        <legend>Support File</legend>
+
+                        <p class="warning">
+                          WARNING: The downloaded support file might contain sensitive information (such as passwords,
+                          details about your network, etc.). Make sure to share it only with trusted third parties.
+                        </p>
+
+                        <div class="input">
+                          <button id="SupportFileButton" type="button">Download Support File</button>
+                        </div>
+                      </fieldset>
+                    </div>
+                  %end
+
+                  <fieldset class="actions">
+                    <button type="submit">Save</button>
+                  </fieldset>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

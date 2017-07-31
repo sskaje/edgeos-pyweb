@@ -1,0 +1,27 @@
+<div class="instructions">
+    TCP MSS clamping configuration
+</div>
+
+<fieldset name="mss-clamp" class="primary expanded">
+    <legend>TCP MSS clamping</legend>
+        <div class="checkbox-toggle">
+            <div><label><input type="checkbox" name="clamp" value="clamp" /><span>Enable MSS clamping for TCP connections</span></label></div>
+            <div class="toggled nested hidden">
+                <div class="group-checkbox">
+                    <div class="title"><span>Interface Types</span></div>
+                    <div><input type="checkbox" name="interface-type" value="all" data-default="true" class="all" /><span>All</span></div>
+                    <div><input type="checkbox" name="interface-type" value="pppoe" class="rest" /><span>PPPoE</span>
+                    <div class="clear"></div>
+                    <input type="checkbox" name="interface-type" value="pptp" class="rest" /><span>PPTP</span>
+                    <div class="clear"></div>
+                    <input type="checkbox" name="interface-type" value="tun" class="rest" /><span>Tun</span>
+                    <div class="clear"></div>
+                    <input type="checkbox" name="interface-type" value="vti" class="rest" /><span>VTI</span>
+                    <div class="clear"></div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div><label><span class="label">MSS</span></label><input type="text" name="mss" data-default="1412" /></div>
+            </div>
+        </div>
+</fieldset>

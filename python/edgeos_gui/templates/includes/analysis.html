@@ -1,0 +1,188 @@
+<div id="TrafficAnalysis" class="main-section">
+    <div class="section-container tall"></div>
+</div>
+
+<script id="TrafficAnalysisDefaultTemplate" type="text/template">
+    <div class="section-title ui-layout-north" id="TrafficAnalysisUserStatus"></div>
+    <div class="ui-layout-center" id="TrafficAnalysisContainer">
+        <div class="ui-layout-west" id="TrafficAnalysisGraphAndCategory">
+            <div id="TrafficAnalysisUserGraph" class="ui-layout-north"></div>
+            <div id="TrafficAnalysisCategoryContainer" class="ui-layout-center"></div>
+        </div>
+        <div class="ui-layout-center">
+            <div id="TrafficAnalysisUserData"></div>
+        </div>
+    </div>
+</script>
+
+<script id="TrafficAnalysisCategoryTemplate" type="text/template">
+  <div class="section-container">
+    <div id="IpList" class="table-container">
+      <div id="TrafficAnalysisCategoryAdd" class="add">
+        <button type="button">Add Category</button>
+      </div>
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>Category</th>
+          <th>Apps</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</script>
+
+<script id="TrafficAnalysisCategoryDropDownButtonTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<script id="TrafficAnalysisCategoryConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary required" for="category<%= id %>">Category</label>
+          <div>
+            <input type="text" id="category<%= id %>" name="category" class="text-input"/>
+          </div>
+        </fieldset>
+        <fieldset class="primary">
+          <legend class="primary" data-field="apps">Apps</legend>
+          <fieldset class="apps">
+            <div class="app">
+              <input name="app" type="text"/>
+              <span class="remove"/></span>
+            </div>
+          </fieldset>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="TrafficAnalysisUserStatusTemplate" type="text/template">
+  <span>Traffic Analysis</span>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <span class='hyperlink clear-data'>Clear Data</span>
+  <div class="section">
+    <div class='title-bar'>
+      <div class='form options'>
+        <span>Operational Status</span>
+        <input type="radio" name="status" value="both"/><span>Enabled</span>
+        <input type="radio" name="status" value="traffic"/><span>Hosts only</span>
+        <input type="radio" name="status" value="neither" checked/><span>Disabled</span>
+      </div>
+    </div>
+    <div>
+      <div class='clearData'>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script id="TrafficAnalysisUserDataTemplate" type="text/template">
+  <div id="IpList" class="table-container">
+<!--
+    <div id="IpFilters" class="filters">
+        <ul class="ui-tabs-buttonset">
+            <li class="all"><a href="#<%= section %>">All</a></li>
+            <li class="ethernet"><a href="#<%= section %>/filter/ethernet">Ethernet</a></li>
+        </ul>
+    </div>
+-->
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th></th>
+        <th>Host</th>
+        <th>Tx Rate</th>
+        <th>Rx Rate</th>
+        <th>Tx Bytes</th>
+        <th>Rx Bytes</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="TrafficAnalysisUserD3Template" type="text/template">
+  <div class="section">
+    <div class="section-title">
+      Top Hosts
+      <div class="options">
+        <input type="radio" name="bytes" value="tx_bytes"/><span>Tx Bytes</span>
+        <input type="radio" name="bytes" value="rx_bytes"/><span>Rx Bytes</span>
+        <input type="radio" name="bytes" value="total_bytes" checked/><span>Total Bytes</span>
+      </div>
+    </div>
+    <div class="graph">
+      <div class="details">
+        <table>
+          <tr class="host title"></tr>
+          <tr class="ip"></tr>
+          <tr class="bytes title"></tr>
+          <tr class="apps"></tr>
+        </table>
+      </div>
+      <div class="summary">
+        <table>
+          <tr><th></th></tr>
+          <tr><td></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="floating">
+      <div class="legend-container">
+        <div class="legend"></div>
+      </div>
+    </div>
+    <div class="loading"></div>
+  </div>
+</script>
+
+<script id="TrafficAnalysisUserDrillDownTemplate" type="text/template">
+  <div class="inner-details">
+    <div class="content">
+      <!--<div class="title">Top Categories</div>-->
+      <div class="topcats"></div>
+      <div class="title">Top Apps (Tx Bytes/Rx Bytes)</div>
+      <div class="topapps"></div>
+    </div>
+  </div>
+</script>
+
+<script id="TrafficAnalysisAddApplicationTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary required" for="app<%= id %>">App</label>
+          <div><%= app %></div>
+          <label class="primary required" for="category<%= id %>">Category</label>
+          <div>
+            <select name="existing">
+              <option value="create-new-category">Create New Category</option>
+            </select>
+          </div>
+
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>

@@ -1,0 +1,101 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx="firewall options mss-clamp"
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+cli=cli-shell-api
+
+load () {
+    clamp=
+    if $cli existsActive $pfx; then
+        clamp=clamp
+    fi
+    infs=''
+    for t in pppoe pptp tun vti all; do
+        if $cli existsActive $pfx interface-type $t; then
+            if [ -z "$infs" ]; then
+                infs="$t"
+            elif [[ $t = 'all' ]]; then
+                infs="$t"
+            else
+                infs+=",$t"
+            fi
+        fi
+    done
+    if [ -z "$infs" ]; then
+        infs='all'
+    fi
+    mss=''
+    mss=$($cli returnActiveValue $pfx mss)
+    if [ -z "$mss" ]; then
+        mss='1412'
+    fi
+
+    echo "{\"success\":\"1\",\"data\":{\"clamp\":\"$clamp\",\"interface-type\":\"$infs\",\"mss\":\"$mss\"}}"
+}
+
+apply () {
+    eval "clamp=$(cat $INPUT | jq .clamp)"
+    eval "mss=$(cat $INPUT | jq .mss)"
+    eval "infs=($(cat $INPUT | jq '."interface-type"'[]))"
+
+    local ret=0
+    tfile=$(mktemp)
+    (
+    $cmd begin
+    $cmd delete $pfx || ret=1
+    if [ "$clamp" == clamp ]; then
+        if ! $cmd set $pfx; then
+            ret=1
+        fi
+
+        if [ -z "$infs" ]; then
+            eval "inf=$(cat $INPUT | jq '."interface-type"')"
+            if ! $cmd set $pfx interface-type "$inf"; then
+                ret=1
+            fi
+        else
+            for inf in "${infs[@]}"; do
+                if ! $cmd set $pfx interface-type "$inf"; then
+                    ret=1
+                fi
+            done
+        fi
+
+        if [ ! -z "$mss" ]; then
+            if ! $cmd set $pfx mss "$mss"; then
+                ret=1
+            fi
+        fi
+    fi
+    if [ $ret == 0 ]; then
+        $cmd commit || ret=1
+    fi
+    if [ $ret == 0 ]; then
+        $cmd save || ret=1
+    fi
+    $cmd end
+    exit $ret
+    ) >$tfile 2>&1
+    ret=$?
+
+    local output=$(cat $tfile)
+    rm -f $tfile
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": \"${output//\"/\'}\"}"
+    fi
+}
+
+case "$ACTION" in
+    load)
+        load
+        ;;
+    apply)
+        apply
+        ;;
+esac

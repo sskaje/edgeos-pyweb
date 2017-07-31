@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta name="copyright" content="Copyright 2012 Ubiquiti Networks, Inc. All rights reserved.">
+
+    <title>EdgeOS CLI</title>
+
+    <link rel="shortcut icon" href="/media/global/favicon.ico" />
+    %if compressed:
+      <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/reset.min.css" type="text/css" media="screen" />
+      <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/cli/styles.min.css" type="text/css">
+      <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/cli/edge.min.css" type="text/css">
+    %else:
+      <link rel="stylesheet" href="/lib/stylesheets/css/reset.css" type="text/css" media="screen" />
+      <link rel="stylesheet" href="/lib/stylesheets/css/cli/styles.css" type="text/css">
+      <link rel="stylesheet" href="/lib/stylesheets/css/cli/edge.css" type="text/css">
+    %end
+
+    <script type="text/javascript">
+      var EDGE = window.EDGE || {};
+
+        if (typeof navigator.appName == 'undefined' || navigator.appName != 'Netscape') {
+          document.write('<style type="text/css">' +
+             '#vt100 #console div, #vt100 #alt_console div {' +
+             '  overflow: hidden;' +
+             '}' +
+             '</style>');
+        }
+
+      var suppressAllAudio = true,
+        linkifyURLs = false,
+        wsURL = '{{ absolute_url("/ws/cli", scheme="wss") }}'
+      ;
+
+      var userCSSList = [
+        [ 'Transparent', false, true, '/lib/{{ build }}/stylesheets/css/cli/' ],
+        [ 'Solid', false, false, '/lib/{{ build }}/stylesheets/css/cli/' ],
+        [ 'Monochrome', true, false, '/lib/{{ build }}/stylesheets/css/cli/' ],
+        [ 'Color Terminal', false, true, '/lib/{{ build }}/stylesheets/css/cli/' ]
+      ];
+    </script>
+
+        %if compressed:
+            <script type="text/javascript" src="/lib/{{ build }}/js/vt100.min.js"></script>
+        %else:
+            <script type="text/javascript" src="/lib/js/libs/vt100.js"></script>
+        %end
+
+    <script type="text/javascript">
+      function extend(subClass, baseClass) {
+        function inheritance() {}
+        inheritance.prototype          = baseClass.prototype;
+        subClass.prototype             = new inheritance();
+        subClass.prototype.constructor = subClass;
+        subClass.prototype.superClass  = baseClass.prototype;
+      };
+      extend(CLI = function() {}, VT100);
+
+      CLI.prototype.initialize = function(url, container) {
+        this.superClass.constructor.call(this, container);
+        this.wsURL = url;
+        this.ws = null;
+
+        setTimeout(function(cli) {
+          return function() {
+            cli.run();
+          };
+        }(this), 1000);
+
+        this.reconnectBtn.firstChild.className = 'ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-secondary';
+        this.reconnectBtn.firstChild.value = 'Reconnect';
+      };
+
+      CLI.prototype.keysPressed = function(ch) {
+        if (this.ws) {
+          //console.log('send[' + ch + ']');
+          this.ws.send(ch);
+        } else {
+          //console.log('sent[' + ch + '] - unsent');
+        }
+      };
+
+      CLI.prototype.run = function() {
+        var self = this;
+
+        //self.initializeElements();
+        this.ws = new WebSocket(this.wsURL);
+        this.ws.onmessage = function(e) {
+          var reader = new FileReader();
+          reader.onload = function(r) {
+            //console.log('recv[' + r.target.result + ']');
+            //self.vt100(r.target.result);
+            self.vt100(String.fromCharCode.apply(null, new Uint8Array(r.target.result)));
+          };
+          //reader.readAsBinaryString(e.data);
+          reader.readAsArrayBuffer(e.data);
+        };
+
+        this.ws.onclose = function() {
+          self.ws = null;
+          self.showReconnect(true);
+        };
+      };
+
+      CLI.prototype.showReconnect = function(state) {
+        this.superClass.showReconnect.call(this, state);
+
+        if (state) {
+          document.body.className = 'disabled';
+        } else {
+          document.body.className = '';
+        }
+      };
+
+      CLI.prototype.reconnect = function() {
+        this.reset(false);
+        this.showReconnect(false);
+        this.run();
+      };
+
+      window.onload = setTimeout(function() {
+        EDGE.CLI = new CLI();
+        EDGE.CLI.initialize(wsURL);
+      }, 100);
+    </script>
+  </head>
+
+  <body scroll="no"></body>
+</html>

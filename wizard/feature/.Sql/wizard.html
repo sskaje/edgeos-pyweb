@@ -1,0 +1,121 @@
+<fieldset name="sql" class="primary">
+    <legend class="advance hidden">SQL</legend>
+    <div class="addable" data-name="sql" data-level="0" data-min="1" data-object="sql-config" data-objectify="1">
+        <legend class="section">Smart Queue Management</legend>
+        <div class="addable-template" data-parent="sql" data-level="0">
+            <div class="multi">
+                <label><span class="text">Policy name</span></label><div><input type="text" name="protocol" /></div>
+                    <div class="clear"></div>
+                    <div class="level1">
+                    <label><span class="text">WAN Interface</span></label>
+                    <div><span><select name="interfaces" /></span></div>
+
+                    <!-- Upload Section -->
+                    <label><span class="text">Upload</span></label>
+                    <div><input type="checkbox" name="up" value="true" checked />Apply to upload traffic</div>
+                    <div class="level1">
+                        <label><span class="text">Rate</span></label>
+                        <div style="display:inline;"><input type="text" name="rate-up" /></div>
+                        <div style="display:inline;"><select name="suffix-rate-up" data-infotip="Bandwidth limit">
+                            <option value='bit'>bits/sec</option>
+                            <option value='kbit'>Kbits/sec</option>
+                            <option value='mbit' selected>Mbits/sec</option>
+                        </select></div>
+                        <div class="advance-container">
+                            <label><span class="text">Burst</span></label>
+                            <div style="display:inline;"><input name="burst-up" type="text" /></div>
+                            <div style="display:inline;"><select class="suffix" name="suffix-burst-up" data-infotip="Amount of bytes that can be burst at best-effort. <br />Allowed burst range: 1500bytes - 10Mbytes">
+                                <option value='b'>bytes</option>
+                                <option value='kb'>Kbytes</option>
+                                <option value='mb'>Mbytes</option>
+                            </select></div>
+                            <label><span class="text">Target</span></label>
+                            <div style="display:inline;"><input name="target-up" type="text" /></div>
+                            <div style="display:inline;"><select class="suffix" name="suffix-target-up" data-infotip="Acceptable minimum queue delay.<br />Allowed target range: 10us - 10s.<br />Default value: 5ms." >
+                                <option value="us">microseconds (us)</option>
+                                <option value="ms" selected>milliseconds (ms)</option>
+                                <option value="secs">seconds</option>
+                            </select></div>
+                            <label><span class="text">Interval</span></label>
+                            <div style="display:inline;"><input name="interval-up" type="text"/></div>
+                            <div style="display:inline;"><select class="suffix" name="suffix-interval-up" data-infotip="Enter dropping mode when the minimum queue delay has exceeded target for a time greater than configured interval.<br />Allowed interval range: 1ms - 20s.<br />Default value: 100ms.">
+                                <option value="us">microseconds (us)</option>
+                                <option value="ms" selected>milliseconds (ms)</option>
+                                <option value="secs">seconds</option>
+                            </select></div>
+                            <label><span class="text">ECN</span></label>
+                            <div><input type="checkbox" name="ecn-up" value="enable" checked />Enable (Mark packets instead of dropping them)</div>
+                            <label><span class="text">Flows</span></label>
+                            <div><input name="flows-up" type="text" value="1024" data-infotip="number of flows into which the incoming packets are classified.<br />Range: 1-65535" /></div>
+                            <label><span class="text">Limit</span></label>
+                            <div><input name="limit-up" type="text" value="10240" data-infotip="Hard limit on the real queue size. <br />Queue size in packets: 1-1000000" /></div>
+                            <label><span class="text">FQ_CODEL Quantum</span></label>
+                            <div style="display:inline;"><input name="fq-up" type="text" value="1514" /></div>
+                            <div style="display:inline;"><span data-infotip="Packet scheduling quantum for FQ_CODEL.<br />Packet scheduling quantum (bytes): 256-65535">bytes</span></div>
+                            <label><span class="text">HTB Quantum</span></label>
+                            <div style="display:inline;"><input name="htb-up" type="text"></div>
+                            <div style="display:inline;"><span data-infotip="Packet scheduling quantum for HTB.<br />Packet scheduling quantum (bytes): 1-65535">bytes</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <label><span class="text">Download</span></label>
+                    <div><input type="checkbox" name="down" value="true" checked />Apply to download traffic</div>
+                    <div class="level1">
+                        <label><span class="text">Rate</span></label>
+                        <div style="display:inline;"><input type="text" name="rate-down" /></div>
+                        <div style="display:inline;"><select name="suffix-rate-down" data-infotip="Bandwidth limit">
+                            <option value='bit'>bits/sec</option>
+                            <option value='kbit'>Kbits/sec</option>
+                            <option value='mbit' selected>Mbits/sec</option>
+                        </select></div>
+                        <div class="advance-container">
+                            <label><span class="text">Burst</span></label>
+                            <div style="display:inline;"><input name="burst-down" type="text" /></div>
+                            <div style="display:inline;"><select class="suffix" name="suffix-burst-down" data-infotip="Amount of bytes that can be burst at best-effort. <br />Allowed burst range: 1500bytes - 10Mbytes">
+                                <option value='b'>bytes</option>
+                                <option value='kb'>Kbytes</option>
+                                <option value='mb'>Mbytes</option>
+                            </select></div>
+                            <label><span class="text">Target</span></label>
+                            <div style="display:inline;"><input name="target-down" type="text" /></div>
+                            <div style="display:inline;"><select class="suffix" name="suffix-target-down" data-infotip="Acceptable minimum queue delay.<br />Allowed target range: 10us - 10s.<Br />Default value: 5ms." >
+                                <option value="us">microseconds (us)</option>
+                                <option value="ms" selected>milliseconds (ms)</option>
+                                <option value="secs">seconds</option>
+                            </select></div>
+                            <label><span class="text">Interval</span></label>
+                            <div style="display:inline;"><input name="interval-down" type="text"/></div>
+                            <div style="display:inline;"><select class="suffix" name="suffix-interval-down" data-infotip="Enter dropping mode when the minimum queue delay has exceeded target for a time greater than configured interval.<br />Allowed interval range: 1ms - 20s.<br />Default value: 100ms.">
+                                <option value="us">microseconds (us)</option>
+                                <option value="ms" selected>milliseconds (ms)</option>
+                                <option value="secs">seconds</option>
+                            </select></div>
+                            <label><span class="text">ECN</span></label>
+                            <div><input type="checkbox" name="ecn-down" value="enable" checked />Enable (Mark packets instead of dropping them)</div>
+                            <label><span class="text">Flows</span></label>
+                            <div><input name="flows-down" type="text" value="1024" data-infotip="number of flows into which the incoming packets are classified.<br />Range: 1-65535" /></div>
+                            <label><span class="text">Limit</span></label>
+                            <div><input name="limit-down" type="text" value="10240" data-infotip="Hard limit on the real queue size. <br />Queue size in packets: 1-1000000" /></div>
+                            <label><span class="text">FQ_CODEL Quantum</span></label>
+                            <div style="display:inline;"><input name="fq-down" type="text" value="1514" /></div>
+                            <div style="display:inline;"><span data-infotip="Packet scheduling quantum for FQ_CODEL.<br />Packet scheduling quantum (bytes): 256-65535">bytes</span></div>
+                            <label><span class="text">HTB Quantum</span></label>
+                            <div style="display:inline;"><input name="htb-down" type="text"></div>
+                            <div style="display:inline;"><span data-infotip="Packet scheduling quantum for HTB.<br />Packet scheduling quantum (bytes): 1-65535">bytes</span></div>
+                        </div>
+                    </div>
+                    <!-- End of Download Section -->
+
+                    <div class="clear"></div>
+                    <button type="button" class="addable-remove" data-level="0" data-parent="sql">Remove</button>
+                </div>
+            </div>
+        </div>
+        <div class="addable-container" data-parent="sql" data-level="0">
+            <!-- the addables will be inserted here -->
+        </div>
+        <div class="clear"></div>
+        <button type="button" class="addable-add" data-parent="vpn">Add Smart Queue</button>
+    </div>
+</fieldset>

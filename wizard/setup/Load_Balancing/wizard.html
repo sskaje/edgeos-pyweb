@@ -1,0 +1,263 @@
+<script type="text/javascript">
+$(function() {
+    var $body = $('body');
+    var $form = $('form.wizard-form');
+    var $addable = $form.find('.addable');
+
+    if ($body.hasClass('port3')) {
+        $addable.hide();
+    } else {
+        var max;
+        if ($body.hasClass('port5')|| $body.hasClass('port5A')) {
+            max = 2;
+        }
+        if ($body.hasClass('port6') || $body.hasClass('port6A')) {
+            max = 3;
+        }
+        if ($body.hasClass('port8') || $body.hasClass('port8A')) {
+            max = 5;
+        }
+        if ($body.hasClass('port9')) {
+            max = 6;
+        }
+        $form.find('.addable').data('max', max);
+    }
+});
+</script>
+<div class="instructions" data-reboot="true">
+<p>Use this wizard to set up basic load balancing with two Internet
+connections from different Internet Service Providers.</p>
+<p>It will generate a new configuration, completely replacing the
+existing configuration.
+A reboot is required for the new configuration to take effect.</p>
+</div>
+
+<fieldset name="eth0" class="primary expanded">
+    <legend>First Internet port</legend>
+    
+    <div class="instructions">
+        Connect <span class="eth0-instruction"></span> to your first Internet connection, for example, the cable modem or DSL modem, and select the connection type.
+    </div>
+
+    <label><span>Port</span> <select data-default="eth0" class="internet-interface wan0" name="eth0-internet-interface"></select></label>
+
+    <div class="grouped">
+        <div class="label"><span>Internet connection type</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="eth0-wan-options" class="wan-options" value="dhcp" checked="checked" />DHCP <span class="populate eth0-dhcp-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled">
+            <label>Automatically obtain network settings from the Internet Service Provider</label>
+            </div>
+
+            <label><input type="radio" name="eth0-wan-options" class="wan-options" value="static" />Static IP</label>
+            <div class="nested toggled hidden">
+                <label>Static network settings provided by the Internet Service Provider<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">Address</span></div>
+                    <div><span><input type="text" name="eth0-static-address" value="" data-infotip='IP address (e.g., 12.34.56.78)' /></span></div>
+                    <div><span class="text"> / </span></div>
+                    <div><span><input type="text" name="eth0-static-mask" value="" data-infotip='Network mask (e.g., 255.255.255.0) or prefix length (e.g., 24)' /></span></div>
+                </label>
+                <label><div class="title"><span class="text">Gateway</span></div><div> <input type="text" name="eth0-static-gateway" value="" data-infotip='IP address of gateway (e.g., 12.34.56.78)' /></div></label>
+                <label><div class="title"><span class="text">DNS server</span></div><div> <input type="text" name="eth0-static-dns" class="static-dns" value="" data-infotip='IP address of DNS server (e.g., 12.34.56.78)' /></div></label>
+            </div>
+            
+            <label><input type="radio" name="eth0-wan-options" class="wan-options" value="pppoe" />PPPoE <span class="populate eth0-pppoe-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled hidden">
+                <label>PPPoE account name and password provided by the Internet Service Provider<br /><br /></label>
+                <label><div class="title"><span class="text">Account name</span></div><div> <input type="text" name="eth0-pppoe-userid" value="" data-infotip="Account name for PPPoE"/></div></label>
+                <label><div class="title"><span class="text">Password</span></div><div> <input type="password" name="eth0-pppoe-password" value="" data-infotip="Password for PPPoE" data-group="pppoe2" /></div><label class="in-line"><input style="margin-left:20px !important;" type="checkbox" name="show-password" data-group="pppoe2" />show password</label></label>
+            </div>
+        </div>
+    </div>
+    
+    <label><span>Firewall</span> <input type="checkbox" name="eth0-enable-default-firewall" value="true" checked="checked" /> <span class="note">Enable the default firewall</span></label>
+</fieldset>
+
+<fieldset name="eth1" class="primary expanded">
+    <legend>Second Internet port</legend>
+    
+    <div class="instructions">
+        Connect <span class="eth1-instruction"></span> to your second Internet connection, for example, the cable modem or DSL modem, and select the connection type.
+    </div>
+
+    <label><span>Port</span> <select data-default="eth1" class="internet-interface wan1" name="eth1-internet-interface"></select></label>
+
+    <div class="grouped">
+        <div class="label"><span>Internet connection type</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="eth1-wan-options" class="wan-options" value="dhcp" checked="checked" />DHCP <span class="populate eth1-dhcp-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled">
+            <label>Automatically obtain network settings from the Internet Service Provider</label>
+            </div>
+
+            <label><input type="radio" name="eth1-wan-options" class="wan-options" value="static" />Static IP</label>
+            <div class="nested toggled hidden">
+                <label>Static network settings provided by the Internet Service Provider<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">Address</span></div>
+                    <div><span><input type="text" name="eth1-static-address" value="" data-infotip='IP address (e.g., 12.34.56.78)' /></span></div>
+                    <div><span class="text"> / </span></div>
+                    <div><span><input type="text" name="eth1-static-mask" value="" data-infotip='Network mask (e.g., 255.255.255.0) or prefix length (e.g., 24)' /></span></div>
+                </label>
+                <label><div class="title"><span class="text">Gateway</span></div><div> <input type="text" name="eth1-static-gateway" value="" data-infotip='IP address of gateway (e.g., 12.34.56.78)' /></div></label>
+                <label><div class="title"><span class="text">DNS server</span></div><div> <input type="text" name="eth1-static-dns" class="static-dns" value="" data-infotip='IP address of DNS server (e.g., 12.34.56.78)' /></div></label>
+            </div>
+            
+            <label><input type="radio" name="eth1-wan-options" class="wan-options" value="pppoe" />PPPoE <span class="populate eth1-pppoe-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled hidden">
+                <label>PPPoE account name and password provided by the Internet Service Provider<br /><br /></label>
+                <label><div class="title"><span class="text">Account name</span></div><div> <input type="text" name="eth1-pppoe-userid" value="" data-infotip="Account name for PPPoE"/></div></label>
+                <label><div class="title"><span class="text">Password</span></div><div> <input type="password" name="eth1-pppoe-password" value="" data-infotip="Password for PPPoE" data-group="pppoe1" /></div><label class="in-line"><input style="margin-left:20px !important;" type="checkbox" name="show-password" data-group="pppoe1" />show password</label></label>
+            </div>
+        </div>
+    </div>
+    
+    <label><span>Firewall</span> <input type="checkbox" name="eth1-enable-default-firewall" value="true" checked="checked" /> <span class="note">Enable the default firewall</span></label>
+    <label><span>Failover Only</span> <input type="checkbox" name="eth1-failover-only" value="true" /> <span class="note">Only this interface if the other fails</span></label>
+</fieldset>
+
+<div class="addable ports" data-min="0" data-max="10" data-object="load-balancing-config" data-objectify="1">
+    <div class="addable-template">
+        <fieldset class="primary expanded toggled">
+            <legend>Additional Internet port</legend>
+            <div>
+                <label><span>Port</span> <select class="internet-interface" name="ethx-internet-interface"></select></label>
+            </div>
+
+            <div class="grouped">
+                <div class="label"><span>Internet connection type</span></div>
+                <div class="group radio-toggles">
+                    <label><input type="radio" name="ethx-wan-options" class="multi wan-options" value="dhcp" checked="checked" />DHCP <span class="populate ethx-dhcp-addr">Current IP: <span class="value">Unavailable</span></span></label>
+                    <div class="nested toggled">
+                    <label>Automatically obtain network settings from the Internet Service Provider</label>
+                    </div>
+
+                    <label><input type="radio" name="ethx-wan-options" class="multi wan-options" value="static" />Static IP</label>
+                    <div class="nested toggled hidden">
+                        <label>Static network settings provided by the Internet Service Provider<br /><br /></label>
+                        <label class="multi">
+                            <div class="title"><span class="text">Address</span></div>
+                            <div><span><input type="text" name="ethx-static-address" value="" data-infotip='IP address (e.g., 12.34.56.78)' /></span></div>
+                            <div><span class="text"> / </span></div>
+                            <div><span><input type="text" name="ethx-static-mask" value="" data-infotip='Network mask (e.g., 255.255.255.0) or prefix length (e.g., 24)' /></span></div>
+                        </label>
+                        <label><div class="title"><span class="text">Gateway</span></div><div> <input type="text" name="ethx-static-gateway" value="" data-infotip='IP address of gateway (e.g., 12.34.56.78)' /></div></label>
+                        <label><div class="title"><span class="text">DNS server</span></div><div> <input type="text" name="ethx-static-dns" class="static-dns" value="" data-infotip='IP address of DNS server (e.g., 12.34.56.78)' /></div></label>
+                    </div>
+
+                    <label><input type="radio" name="ethx-wan-options" class="multi wan-options" value="pppoe" />PPPoE <span class="populate ethx-pppoe-addr">Current IP: <span class="value">Unavailable</span></span></label>
+                    <div class="nested toggled hidden">
+                        <label>PPPoE account name and password provided by the Internet Service Provider<br /><br /></label>
+                        <label><div class="title"><span class="text">Account name</span></div><div> <input type="text" name="ethx-pppoe-userid" value="" data-infotip="Account name for PPPoE"/></div></label>
+                        <label><div class="title"><span class="text">Password</span></div><div> <input type="password" name="ethx-pppoe-password" value="" data-infotip="Password for PPPoE" data-group="pppoe2" /></div><label class="in-line"><input style="margin-left:20px !important;" type="checkbox" name="show-password" data-group="pppoe2" />show password</label></label>
+                    </div>
+                </div>
+            </div>
+
+            <label><span>Firewall</span> <input type="checkbox" name="ethx-enable-default-firewall" value="true" checked="checked" /> <span class="note">Enable the default firewall</span></label>
+            <label><span><button type="button" class="addable-remove">Remove</button></span></label>
+        </fieldset>
+    </div>
+    <div class="addable-container">
+        <!-- the addables will be inserted here -->
+    </div>
+    <button type="button" class="addable-add">Add Additional Internet port</button>
+</div>
+
+<fieldset name="eth2" class="primary">
+    <legend><span class="blacklist port5">LAN port (<span class='lan-interface'></span>)</span><span class="whitelist port5">LAN ports (<span class='lan-interfaces'></span>)</legend>
+
+    <div class="instructions">
+        <span>
+        Connect the LAN port(s) to your devices or/and a switch that connects to additional devices.
+        </span>
+    </div>
+
+    <label><span>Port</span> <select data-default="eth2" class="internet-interface lan" name="eth2-internet-interface"></select></label>
+
+    <label>
+        <span class="text">Address</span>
+        <span><input type="text" name="eth2-static-address" value="192.168.1.1" /></span>
+        <span class="text"> / </span>
+        <span><input type="text" name="eth2-static-mask" value="255.255.255.0" /></span>
+    </label>
+    <label><span>DHCP</span> <input type="checkbox" name="eth2-dhcp-server" value="true" checked="checked" /> <span class="note">Enable the DHCP server</span></label>
+</fieldset>
+
+<fieldset name="user" class="primary expanded">
+    <legend><span>User setup</span></legend>
+    <div class="instructions">
+        <span>
+        Setup user and password for the new router config.
+        </span>
+    </div>
+    <div class="grouped">
+        <div class="label"><span>User</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="user-options" value="ubnt" checked="checked" />Use default user</label>
+            <div class="nested toggled">
+                <label>Use default user and password for the router. Password could be customized optionally.<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">User</span></div>
+                    <div> <input type="text" name="ubnt-user" value="ubnt" disabled /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Password</span></div>
+                    <div> <input type="password" name="ubnt-password" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Confirm Password</span></div>
+                    <div> <input type="password" name="ubnt-confirm-password" /></div>
+                </label>
+            </div>
+            <label><input type="radio" name="user-options" value="new" />Create new admin user</label>
+            <div class="nested toggled">
+                <label>Create new admin user. Note: default user(ubnt) will be removed.<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">User</span></div>
+                    <div><input type="text" name="new-user" value="" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Password</span></div>
+                    <div> <input type="password" name="new-password" value="" class="password-password" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Confirm Password</span></div>
+                    <div> <input type="password" name="new-confirm-password" value="" /></div>
+                </label>
+            </div>
+            <label><input type="radio" name="user-options" value="old" />Keep existing users</label>
+            <div class="nested toggled">
+                <label>Keep existing users and passwords on the router.<br /><br /></label>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset name="lan-to-lan" class="primary">
+    <legend><span>LAN-to-LAN exclusion</span></legend>
+    <div class="instructions">
+        <span>
+        Enable LAN-to-LAN exclusion to avoid load-balance traffic that is going from LAN to LAN.
+        </span>
+    </div>
+
+    <label>
+        <span>LAN-to-LAN exclusion</span>
+        <input type="checkbox" name="lan-to-lan-exclusion" value="true" checked /> <span class="note">Enable</span>
+    </label>
+</fieldset>
+
+<div class="reset-manual hidden" data-reboot="true">
+    <p>The current configuration will be replaced and a reboot is required
+    for the new configuration to take effect. To reconnect to the router
+    after the reboot:</p>
+    <ul>
+        <li>Connect the client device (e.g., laptop) to the LAN port.</li>
+        <li>Set the client device to use DHCP to obtain an IP from the router.
+            (If DHCP server for LAN is not enabled, set a static IP.)</li>
+        <li>Use browser to go to "https://192.168.1.1". (If router's LAN
+            IP address is changed from the default, use that IP instead.)</li>
+    </ul>
+</div>

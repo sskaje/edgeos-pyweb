@@ -1,0 +1,38 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx="vpn ipsec"
+ppfx="vpn ipsec site-to-site peer"
+ipfx="vpn ipsec ipsec-interfaces"
+fpfx="vpn ipsec ike-group"
+dpfx=" vpn ipsec sa"
+cli=cli-shell-api
+run=/opt/vyatta/bin/vyatta-op-cmd-wrapper
+
+load () {
+    peers=$(cli-shell-api listActiveNodes $ppfx)
+    eval "peerarray=($peers)"
+    str=''
+    for peerip in "${peerarray[@]}"; do
+        desc=$(cli-shell-api returnActiveValue $ppfx $peerip description)
+        ikegrpfoo=$(cli-shell-api returnActiveValue $ppfx $peerip ike-group)
+        [ -n "$str" ] && str+=','
+        ikegrppe=$(cli-shell-api returnActiveValue $fpfx $ikegrpfoo proposal 1 encryption)
+        ikegrpph=$(cli-shell-api returnActiveValue $fpfx $ikegrpfoo proposal 1 hash)
+        ikegrppdh=$(cli-shell-api returnActiveValue $fpfx $ikegrpfoo proposal 1 dh-group)
+        ikegrpl=$(cli-shell-api returnActiveValue $fpfx $ikegrpfoo lifetime)
+        tunstatus=($($run show $dpfx | grep -e '^  peer.*, INSTALLED, T.*' | grep -F $peerip))
+        [ -n "$tunstatus" ] && tunstatus='up' || tunstatus='down'
+        str+="{\"peerip\":\"$peerip\",\"description\":\"$desc\",\"ike-all\":\"$ikegrppe-$ikegrpph-$ikegrppdh-$ikegrpl\",\"tunnel-status\":\"$tunstatus\"}"
+    done
+
+    echo  "{\"success\":\"1\",\"data\":{\"peer-list\":[$str]},\"readonly\":\"1\"}"
+}
+
+case "$ACTION" in
+    load)
+        load
+        ;;
+esac

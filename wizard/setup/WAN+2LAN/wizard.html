@@ -1,0 +1,75 @@
+<div class="instructions" data-lock-screen="true">
+    Use this wizard to set up basic Internet connectivity and local network settings
+</div>
+
+<fieldset name="eth0" class="primary">
+    <legend><span class="blacklist port5">LAN port (eth0)</span><span class="whitelist port5">(Optional) Secondary LAN port (eth0)</span></legend>
+
+    <div class="instructions">
+        <span class="blacklist port5">
+        Connect eth0 to your local network, for example, a switch that connects to your devices. This address cannot be changed in the wizard.
+        </span>
+        <span class="whitelist port5">
+        Optionally, connect eth0 to your secondary local network. This address cannot be changed in the wizard.
+        </span>
+    </div>
+
+    <label><span>Address</span><input type="text" name="eth0-address" value="192.168.1.1" disabled="disabled" /> / <input type="text" name="eth0-mask" value="255.255.255.0" disabled="disabled" /></label>
+    <label><span>DHCP</span> <input type="checkbox" name="eth0-dhcp-server" value="true" checked="checked" /> <span class="note">Enable the DHCP server</span></label>
+</fieldset>
+
+<fieldset name="eth1" class="primary expanded">
+    <legend>Internet port (eth1)</legend>
+    
+    <div class="instructions">
+        Connect eth1 to your Internet connection, for example, the cable modem or DSL modem, and select the connection type.
+    </div>
+
+    <div class="grouped">
+        <div class="label"><span>Internet connection type</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="eth1-wan-options" value="dhcp" checked="checked" />DHCP <span class="populate eth1-dhcp-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled">
+            <label>Automatically obtain network settings from the Internet Service Provider</label>
+            </div>
+
+            <label><input type="radio" name="eth1-wan-options" value="static" />Static IP</label>
+            <div class="nested toggled hidden">
+                <label>Static network settings provided by the Internet Service Provider<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">Address</span></div>
+                    <div><span><input type="text" name="eth1-static-address" value="" data-infotip='IP address (e.g., 12.34.56.78)' /></span></div>
+                    <div><span class="text"> / </span></div>
+                    <div><span><input type="text" name="eth1-static-mask" value="" data-infotip='Network mask (e.g., 255.255.255.0) or prefix length (e.g., 24)' /></span></div>
+                </label>
+                <label><div class="title"><span class="text">Gateway</span></div><div> <input type="text" name="eth1-static-gateway" value="" data-infotip='IP address of gateway (e.g., 12.34.56.78)' /></div></label>
+                <label><div class="title"><span class="text">DNS server</span></div><div> <input type="text" name="eth1-static-dns" value="" data-infotip='IP address of DNS server (e.g., 12.34.56.78)' /></div></label>
+            </div>
+            
+            <label><input type="radio" name="eth1-wan-options" value="pppoe" />PPPoE <span class="populate eth1-pppoe-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled hidden">
+                <label>PPPoE account name and password provided by the Internet Service Provider<br /><br /></label>
+                <label><div class="title"><span class="text">Account name</span></div><div> <input type="text" name="eth1-pppoe-userid" value="" data-infotip="Account name for PPPoE"/></div></label>
+                <label><div class="title"><span class="text">Password</span></div><div> <input type="password" name="eth1-pppoe-password" value="" data-infotip="Password for PPPoE" data-group="pppoe"/></div><label class="in-line"><input style="margin-left:20px !important;" type="checkbox" name="show-password" data-group="pppoe" />show password</label></label>
+            </div>
+        </div>
+    </div>
+    
+    <label><span>Firewall</span> <input type="checkbox" name="eth1-enable-default-firewall" value="true" checked="checked" /> <span class="note">Enable the default firewall</span></label>
+</fieldset>
+
+<fieldset name="eth2" class="primary">
+    <legend><span class="blacklist port5">(Optional) Secondary LAN port (eth2)</span><span class="whitelist port5">LAN ports (eth2, eth3, and eth4)</span></legend>
+
+    <div class="instructions">
+        <span class="blacklist port5">
+        Optionally, connect eth2 to your secondary local network. This address cannot be changed in the wizard.
+        </span>
+        <span class="whitelist port5">
+        Connect the LAN ports to your devices or/and a switch that connects to additional devices. This address cannot be changed in the wizard.
+        </span>
+    </div>
+    
+    <label><span>Address</span><input type="text" name="eth2-address" value="192.168.2.1" disabled="disabled" /> / <input type="text" name="eth2-mask" value="255.255.255.0" disabled="disabled" /></label>
+    <label><span>DHCP</span> <input type="checkbox" name="eth2-dhcp-server" value="true" checked="checked" /> <span class="note">Enable the DHCP server</span></label>
+</fieldset>

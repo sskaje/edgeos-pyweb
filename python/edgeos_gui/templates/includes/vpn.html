@@ -1,0 +1,75 @@
+<!-- Start: VPN -->
+<div id="Vpn" class="main-section">
+  <div class="section-tabs">
+    <ul>
+      <li><a href="#Vpn/PPTP" data-container="VpnPptp">PPTP Remote Access</a></li>
+      <li><a href="#Vpn/IPSec" data-container="VpnIpsec">IPsec Site-to-Site</a></li>
+    </ul>
+  </div>
+  <div class="section-container tall tabbed">
+    <div id="VpnPptp" class="wide tall"></div>
+    <div id="VpnIpsec" class="wide tall ui-layout-pane"></div>
+  </div>
+</div>
+
+<script id="VpnPptpTemplate" type="text/template">
+  <div class="section-container service-form">
+    <form method="post" class="ui-form">
+      <fieldset class="primary pptp">
+        <label class="primary required" for="vpn-client-ip-start">Client IP pool range start</label>
+        <div>
+          <input type="text" id="vpn-client-ip-start" name="client-ip-start" class="text-input" data-infotip="Begining IPv4 address for client pool.<br /><br />Example: <b>192.0.2.1</b>" />
+        </div>
+
+        <label class="primary required" for="vpn-client-ip-stop">Client IP pool range stop</label>
+        <div>
+          <input type="text" id="vpn-client-ip-stop" name="client-ip-stop" class="text-input" data-infotip="End IPv4 address for client pool.  Must be within the same /24 as the range start.<br /><br />Example: <b>192.0.2.254</b>" />
+         </div>
+
+        <label class="primary required" for="vpn-server-outside-address">Server outside address</label>
+        <div>
+          <input type="text" id="vpn-server-outside-address" name="server-outside-address" class="text-input" data-infotip="IPv4 address that vpn clients will connect to<br /><br />Example: <b>192.0.2.1</b>" />
+        </div>
+
+        <label class="primary required" for="vpn-radius-server-ip">RADIUS server IP address</label>
+        <div>
+          <input type="text" id="vpn-radius-server-ip" name="radius-server-ip" class="text-input" data-infotip="IPv4 address of the RADIUS server<br /><br />Example: <b>192.0.2.1</b>" />
+        </div>
+
+        <label class="primary required" for="vpn-radius-server-key">RADIUS server key</label>
+        <div>
+          <input type="text" id="vpn-radius-server-key" name="radius-server-key" class="text-input" data-infotip="Password key for RADIUS server" />
+        </div>
+
+        <label class="primary" for="vpn-mtu">MTU</label>
+        <div>
+          <input type="text" id="vpn-mtu" name="mtu" class="text-input" />
+        </div>
+
+        <label class="primary" for="vpn-dns1">DNS 1</label>
+        <div>
+          <input type="text" id="vpn-dns1" name="dns1" class="text-input" data-infotip="IPv4 address<br /><br />Example: <b>192.0.2.1</b>" />
+        </div>
+
+        <label class="primary" for="vpn-dns2">DNS 2</label>
+        <div>
+          <input type="text" id="vpn-dns2" name="dns2" class="text-input" data-infotip="IPv4 address<br /><br />Example: <b>192.0.2.1</b>" />
+        </div>
+      </fieldset>
+
+      <fieldset class="actions">
+        <div>
+          <button type="button" class="delete">Delete</button>
+          <button type="button" class="cancel">Cancel</button>
+          <button type="submit">Save</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</script>
+
+<script id="VpnIpsecTemplate" type="text/template">
+  <div class="section-container service-form">
+    <form method="post" class="ui-form"></form>
+  </div>
+</script>

@@ -1,0 +1,50 @@
+<fieldset name="port-forward" class="primary expanded">
+    <legend class="advance hidden">Set up port forwarding</legend>
+
+    <div class="container">
+    <label><span class="text">WAN interface</span></label><div><select name="wan" /></div>
+    <div class="clear"></div>
+    <label><span class="text">Hairpin NAT</span><input type="checkbox" name="hairpin-nat" value="true" /><span>Enable hairpin NAT (also known as "NAT loopback" or "NAT reflection")</span></label>
+    <div class="advance-container"><label><span class="text">Auto firewall</span><input type="checkbox" name="auto-firewall" value="true" /><span>Enable auto firewall (automatically open ports for specified port forwarding rules)</span></label></div>
+
+    <label><span class="text">LAN interface</span></label>
+    <div class="addable" data-min="0" data-object="lans-config" data-objectify="1">
+        <div class="addable-template" style="padding-top:0;">
+            <div class="multi">
+                <span><select name="lan" /></span>
+                <span><button type="button" class="addable-remove">Remove LAN</button></span>
+            </div>
+        </div>
+        <div class="addable-container">
+            <!-- the addables will be inserted here -->
+        </div>
+        <button type="button" class="addable-add">Add LAN</button>
+    </div>
+
+    <div class="bottomline"></div>
+    <div class="rules">Port forwarding rules<span class="stats"><input type="checkbox" name="stats" />Show rules stats</span></div>
+    <div class="clear"></div>
+    <div class="addable" data-min="0" data-object="rules-config" data-objectify="1">
+        <div class="addable-template">
+            <div><input type="text" class="port" name="original-port" data-infotip='Original port to be forwarded to LAN<br/><br/>Example:<br/>Port name <b>https</b><br/>Port number <b>443</b><br/>Port range <b>1000-2000</b><br/>Multiple ports <b>10,https</b>' /></div>
+            <span><select name="protocol" >
+                <option value="tcp">TCP</option>
+                <option value="udp">UDP</option>
+                <option value="tcp_udp" selected>Both</option>
+            </select></span>
+            <div><input type="text" class="address" name="forward-to-address" data-infotip='Forward packets to this LAN IP address, for example, <b>192.168.1.100</b>' /></div>
+            <div><input type="text" class="port" name="forward-to-port"
+data-infotip='Forward packets to this port (if not set, original port will be used)<br/><br/>Example:<br/>Port name <b>https</b><br/>Port number <b>443</b><br/>Port range <b>1000-2000</b>' /></div>
+            <div><input type="text" class="description" name="description" /></div>
+            <div class="packets hidden"></div>
+            <div class="bytes hidden"></div>
+            <div class="remove"><button type="button" class="addable-remove">Remove Rule</button></div>
+        </div>
+        <table class="addable-container">
+                <tr><th class="port">Original port</th><th class="protocol">Protocol</th><th class="address">Forward-to address</th><th class="port">Forward-to port</th><th class="description">Description</th><th class="stats hidden">Packets</th><th class="stats hidden">Bytes</th></tr>
+                <!-- the addables will be inserted here -->
+        </table>
+        <button type="button" class="addable-add">Add Rule</button>
+    </div>
+    </div>
+</fieldset>

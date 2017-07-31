@@ -1,0 +1,58 @@
+{
+    "rules": {
+        "rate": {
+            "required": true,
+            "rateWithMulti": 1
+        },
+        "r_rate": {
+            "rateWithMulti": 1
+        },
+        "brate": {
+            "rateWithMulti": 1,
+            "validBurst": "bsize"
+        },
+        "r_brate": {
+            "rateWithMulti": 1,
+            "validBurst": "r_bsize"
+        },
+        "bsize": {
+            "sizeWithMulti": 1,
+            "validBurst": "brate"
+        },
+        "r_bsize": {
+            "sizeWithMulti": 1,
+            "validBurst": "r_brate"
+        },
+        "qtype": {
+            "required": true
+        },
+        "r_qtype": {
+            "requiredWithRate": "r_rate"
+        },
+        "src": {
+            "ipv4OrIpv4net": 1
+        },
+        "dest": {
+            "ipv4OrIpv4net": 1
+        },
+        "hfq_bsize": {
+            "sizeWithMulti": 1,
+            "validBurst": "hfq_brate"
+        },
+        "hfq_brate": {
+            "sizeWithMulti": 1,
+            "validBurst": "hfq_bsize"
+        },
+        "hfq_subnet": {
+            "ipv4net": 1,
+            "required": true
+        },
+        "r_hfq_subnet": {
+            "ipv4net": 1,
+            "required": true
+        },
+        "hfq_max": {
+            "rateWithMulti": 1
+        }
+    }
+}

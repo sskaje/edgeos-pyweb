@@ -1,0 +1,73 @@
+<!-- Start: Dialog -->
+<script id="DialogTemplate" type="text/template">
+  <div class="dialog-container">
+    <div class="dialog <%= type %>-<%= dialog %> <%= action %>">
+      <div class="dialog-header">
+        <div class="dialog-icon"></div>
+        <div class="dialog-title"><%= title %></div>
+        <div class="dialog-status"></div>
+        <div class="dialog-close"></div>
+      </div>
+
+      <div class="dialog-content"></div>
+    </div>
+  </div>
+</script>
+<!-- End: Dialog -->
+
+<!-- Start: Takeover -->
+<script id="TakeoverTemplate" type="text/template">
+  <div class="main-section takeover-container">
+    <div class="takeover"></div>
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="ir edgeos-header-logo">EdgeOS</div>
+      </div>
+
+      <div class="content-outer-container">
+        <div class="content-inner-container">
+          <div class="content">
+            <h1 class="section-title"><%= title %></h1>
+            <div class="section-container tall"><%= content %></div>
+            <div class="section-actions"></div>
+            <div class="section-confirm">
+              <div class="title"></div>
+              <div class="body"></div>
+              <div class="actions clearfix">
+                <div class="accept"></div>
+                <div class="reject"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>
+<!-- End: Takeover -->
+
+<!-- Start: Confirmation Dialog -->
+<script id="ConfirmationDialogTemplate" type="text/template">
+  <div id="ConfirmationDialog" title="Add Confirmation" class="confirmation-dialog">
+    <div class="message"></div>
+  </div>
+</script>
+<!-- End: Confirmation Dialog -->
+
+<!-- Start: Alert Dialog -->
+<script id="AlertDialogTemplate" type="text/template">
+  <div id="AlertDialog" title="Add Warning" class="alert-dialog">
+    <div class="message"></div>
+  </div>
+</script>
+<!-- End: Alert Dialog -->
+
+<!-- Start: CLI Dialog -->
+<script id="CLIDialogTemplate" type="text/template">
+    <div id="CLIDialog" title="CLI">
+        <!-- This blocker helps block events from reaching the iframe for resizing the dialog -->
+        <div class="blocker"></div>
+        <iframe seamless="seamless" src="/cli/" width="100%" height="100%"></iframe>
+    </div>
+</script>
+<!-- End: CLI Dialog -->

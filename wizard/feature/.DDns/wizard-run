@@ -1,0 +1,263 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx="service dns dynamic interface"
+pfxd="service dns dynamic"
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+run=/opt/vyatta/bin/vyatta-op-cmd-wrapper
+cli=cli-shell-api
+
+load () {
+    interfaces=$($cli listActiveNodes $pfx)
+    eval "ints=($interfaces)"
+    str=''
+
+    for int in "${ints[@]}"; do
+        services=$($cli listActiveNodes $pfx $int service)
+        eval "servs=($services)"
+
+        web=$($cli returnActiveValue $pfx $int web)
+        eval "web=$(echo $web | jq -R '@json' | sed 's/\$/\\$/g;s/`/\\`/g')"
+
+        ws=$($cli returnActiveValue $pfx $int web-skip)
+        eval "ws=$(echo $ws | jq -R '@json' | sed 's/\$/\\$/g;s/`/\\`/g')"
+
+        sstr=''
+
+        for serv in "${servs[@]}"; do
+            re="^custom-(.+)"
+            serv2=$serv
+            if [[ $serv =~ $re ]]; then
+                serv2=${BASH_REMATCH[1]};
+            fi
+
+            protocol=$($cli returnActiveValue $pfx $int service $serv protocol)
+
+            server=$($cli returnActiveValue $pfx $int service $serv server)
+            eval "server=$(echo $server | jq -R '@json' | sed 's/\$/\\$/g;s/`/\\`/g')"
+
+            hostnames=$($cli returnActiveValues $pfx $int service $serv host-name)
+            eval "hns=($hostnames)"
+            eval "hostname=$(echo $hns | jq -R '@json' | sed 's/\$/\\$/g;s/`/\\`/g')"
+
+            login=$($cli returnActiveValue $pfx $int service $serv login)
+            eval "login=$(echo $login | jq -R '@json' | sed 's/\$/\\$/g;s/`/\\`/g')"
+
+            password=$($cli returnActiveValue $pfx $int service $serv password)
+            eval "password=$(echo $password | jq -R '@json' | sed 's/\$/\\$/g;s/`/\\`/g')"
+
+            [ -n "$sstr" ] && sstr+=','
+            sstr+="{\"services\":\"$serv2\",\"hostname\":$hostname,\"login\":$login,\"password\":$password,"
+            sstr+="\"protocol\":\"$protocol\",\"server\":$server}"
+        done
+
+        [ -n "$str" ] && str+=','
+        str+="{\"interfaces\":\"$int\",\"web\":$web,\"webskip\":$ws,\"service-config\":[$sstr]}"
+    done
+
+    intfs=($(ls /sys/class/net/ | grep -v '^lo$' | grep -v '^bonding_masters$'))
+    ilist=''
+    for int in "${intfs[@]}"; do
+        [ -n "$ilist" ] && ilist+=','
+        ilist+="\"$int\""
+    done
+
+    ilist="{\"options\":[$ilist],\"other\":\"true\"}"
+
+    echo -n "{\"success\":\"1\",\"data\":{\"ddns-config\":[$str]},"
+    echo "\"definition\":{\"interfaces\":$ilist},"
+    echo "\"deletable\":\"1\"}"
+}
+
+force () {
+    local ret=$1
+    local output=$2
+    eval "interfaces=($(cat $INPUT | jq '."ddns-config"[]."interfaces"'))"
+
+    tfile=$(mktemp)
+    (
+    ret=0
+    
+    for ((i = 0; i < ${#interfaces[@]}; i++)); do
+        if ! $run update dns dynamic interface "${interfaces[i]}"; then
+            ret=1
+            break
+        fi
+    done
+    
+    exit $ret
+    ) >$tfile 2>&1
+    output=$(cat $tfile)
+    rm -f $tfile
+    
+    eval "$ret = ret"
+    eval "$output = output"
+}
+
+parse () {
+    local re="^\[(.+)\]$"
+
+    eval "val=($(cat $INPUT | jq --arg i "$3" --arg field "$1" '."ddns-config"[$i | tonumber][$field]' | sed 's/\$/\\$/g;s/`/\\`/g'))"
+
+    if [[ $val =~ $re ]]; then
+        eval "$2=($(cat $INPUT | jq  --arg i "$3" --arg field "$1" '."ddns-config"[$i | tonumber][$field][]' | sed 's/\$/\\$/g;s/`/\\`/g'))"
+    else
+        eval "$2=($(cat $INPUT | jq --arg i "$3" --arg field "$1" '."ddns-config"[$i | tonumber][$field]' | sed 's/\$/\\$/g;s/`/\\`/g'))"
+    fi
+}
+
+apply () {
+    local ret=0
+    local output=''
+    local -A ints
+
+    eval "mode=$(cat $INPUT | jq .mode)"
+    if [ $mode == "force" ]; then
+        force ret output
+    else
+        eval "nints=($(cat $INPUT | jq '."ddns-config"[]."interfaces"'))"
+
+        tfile=$(mktemp)
+        (
+        $cmd begin
+        ret=0
+        $cmd delete $pfxd || ret=1
+
+        for ((i = 0; i < ${#nints[@]}; i++)); do
+            eval "web=($(cat $INPUT | jq -r --arg i "$i" '."ddns-config"[$i | tonumber]."web"' | sed 's/\$/\\$/g;s/`/\\`/g'))"
+            eval "ws=($(cat $INPUT | jq --arg i "$i" '."ddns-config"[$i | tonumber]."webskip"' | sed 's/\$/\\$/g;s/`/\\`/g'))"
+
+            if [[ $web != '' ]]; then
+                if ! $cmd set $pfx "${nints[i]}" web "$web"; then
+                    ret=1
+                    break
+                fi
+            fi
+
+            if [[ $ws != '' ]]; then
+                if ! $cmd set $pfx "${nints[i]}" web-skip "$ws"; then
+                    ret=1
+                    break
+                fi
+            fi
+
+            parse "services" nservs $i
+            parse "hostname" nhosts $i
+            parse "login" nlogins $i
+            parse "password" npasss $i
+            parse "server" nservers $i
+            parse "protocol" nprtcs $i
+
+            for ((j = 0; j < ${#nservs[@]}; j++)); do
+                if [ ${#nservers[@]} -ne 0 ]; then
+                    serv='';
+                    servlist=('afraid' 'dnspark' 'dyndns' 'namecheap' 'zoneedit' 'dslreports' 'easydns' 'sitelutions')
+
+                    for ((k = 0; k < ${#servlist[@]}; k++)); do
+                        if [[ ${servlist[k]} == ${nservs[j]} ]]; then
+                            serv=${nservs[j]}
+                        fi
+                    done
+
+                    if [[ $serv == ''  && ${nservs[$j]} != '' ]]; then
+                        serv="custom-${nservs[$j]}"
+                    fi
+
+                    if [ "${nservers[j]}" != "" ]; then
+                        if ! $cmd set $pfx "${nints[i]}" service "$serv" server "${nservers[j]}"; then
+                            ret=1
+                            break
+                        fi
+                    fi
+                fi
+
+                if [ ${#nprtcs[@]} -ne 0 ]; then
+                    if [ "${nprtcs[j]}" != "" ]; then
+                        if ! $cmd set $pfx "${nints[i]}" service "$serv" protocol "${nprtcs[j]}"; then
+                            ret=1
+                            break
+                        fi
+                    fi
+                fi
+
+                if ! $cmd set $pfx "${nints[i]}" service "$serv" host-name "${nhosts[j]}"; then
+                    ret=1
+                    break
+                fi
+                if ! $cmd set $pfx "${nints[i]}" service "$serv" login "${nlogins[j]}"; then
+                    ret=1
+                    break
+                fi
+                if ! $cmd set $pfx "${nints[i]}" service "$serv" password "${npasss[j]}"; then
+                    ret=1
+                    break
+                fi
+            done
+        done
+
+        if [ $ret == 0 ]; then
+            $cmd commit || ret=1
+        fi
+        if [ $ret == 0 ]; then
+            $cmd save || ret = 1
+        fi
+        $cmd end
+        exit $ret
+        ) >$tfile 2>&1
+        ret=$?
+
+        output=$(cat $tfile)
+        rm -f $tfile
+    fi
+    
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": \"$output//\"/\'}\"}"
+    fi
+}
+
+delete () {
+    local ret=0
+    local output=''
+
+    tfile=$(mktemp)
+    (
+    $cmd begin
+    ret=0
+    $cmd delete $pfxd || ret=1
+
+    if [ $ret == 0 ]; then
+        $cmd commit || ret=1
+    fi
+    if [ $ret == 0]; then
+        $cmd save || ret=1
+    fi
+    $cmd end
+    exit $ret
+    ) >$tfile 2>&1
+    ret=$?
+
+    output=$(cat $tfile | jenc)
+    rm -f $tfile
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": $output}"
+    fi
+}
+
+case "$ACTION" in
+    load)
+        load
+        ;;
+    apply)
+        apply
+        ;;
+    delete)
+        delete
+        ;;
+esac

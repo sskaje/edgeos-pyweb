@@ -1,0 +1,11 @@
+{
+    "rules": {
+        "mss": {
+            "required": true,
+            "range": [536, 1492]
+        },
+        "interface-type": {
+            "required": true
+        }
+    }
+}

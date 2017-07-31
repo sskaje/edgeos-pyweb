@@ -1,0 +1,406 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx="traffic-control smart-queue"
+cli=cli-shell-api
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+
+declare -A units=(
+    ["bit"]=1
+    ["kibit"]=1024
+    ["mibit"]=1048576
+    ["gibit"]=1073741824
+    ["tibit"]=1099511627776
+    ["gbit"]=1000000000
+    ["tbit"]=1000000000000
+    ["bps"]=8
+    ["kibps"]=8192
+    ["kbps"]=8000
+    ["mibps"]=8388608
+    ["mbps"]=8000000
+    ["gibps"]=8589934592
+    ["gbps"]=8000000000
+    ["tibps"]=8796093022208
+    ["tbps"]=8000000000000
+)
+
+regexsuffix () {
+    local regex=$1
+    local num=$2
+    local n=$3
+    local suffix=$4
+    local defsuffix=$5
+
+    s=$defsuffix
+    if [[ $n =~ $regex ]]; then
+        n=${BASH_REMATCH[1]}
+        if [[ -n ${BASH_REMATCH[2],,} ]]; then
+            s=${BASH_REMATCH[2],,}
+        fi
+    fi
+    eval "$num=($n)"
+    eval "$suffix=($s)"
+}
+
+values () {
+    local up=$3
+    local down=$4
+    local upsuffix=$5
+    local downsuffix=$6
+    local regex=$7
+    tup=$($cli returnActiveValue $pfx $2 upload $1)
+    tdown=$($cli returnActiveValue $pfx $2 download $1)
+
+    if [[ -n $upsuffix ]]; then
+        regexsuffix "$regex" ttup "$tup" sup $8
+        regexsuffix "$regex" ttdown "$tdown" sdown $8
+
+        tup=$ttup
+        tdown=$ttdown
+        if [[ $sup = "s" ]]; then
+            sup="secs"
+        fi
+        if [[ $sdown = "s" ]]; then
+            sdown="secs"
+        fi
+        eval "$upsuffix=($sup)"
+        eval "$downsuffix=($sdown)"
+    fi
+
+    eval "$up=($tup)"
+    eval "$down=($tdown)"
+}
+
+def () {
+    local var=$1
+    local val=$2
+    local ret=$val
+    if [[ $val = "" ]]; then
+        ret=$3
+    fi
+    eval "$var=($ret)"
+}
+
+load () {
+    nodes=$($cli listActiveNodes $pfx)
+    eval "sqls=($nodes)"
+    str=''
+
+    for sql in "${sqls[@]}"; do
+        sqlintf=$($cli returnActiveValue $pfx $sql "wan-interface")
+
+        ecnup=$($cli returnActiveValue $pfx $sql upload ecn)
+        ecndown=$($cli returnActiveValue $pfx $sql download ecn)
+        if [[ $ecnup = '' ]]; then
+            ecnup='enable'
+        elif [[ $ecnup = 'disable' ]]; then
+            ecnup=''
+        fi
+        if [[ $ecndown = '' ]]; then
+            ecndown='enable'
+        elif [[ $ecndown = 'disable' ]]; then
+            ecndown=''
+        fi
+
+        up=$($cli returnActiveValue $pfx $sql upload rate)
+        down=$($cli returnActiveValue $pfx $sql download rate)
+        suffix $up upsuffix uprate
+        suffix $down downsuffix downrate
+
+        values "flows" "$sql" flowsup flowsdown
+        values "limit" "$sql" limitup limitdown
+        values "fq-quantum" "$sql" fqup fqdown
+        values "htb-quantum" "$sql" htbup htbdown
+        values "target" "$sql" targetup targetdown targetsuffixup targetsuffixdown "^([0-9]+)(s|secs|ms|us)?$" "ms"
+        values "interval" "$sql" intervalup intervaldown intervalsuffixup intervalsuffixdown "^([0-9]+)(s|secs|ms|us)?$" "ms"
+        values "burst" "$sql" burstup burstdown burstsuffixup burstsuffixdown "^([0-9]+)(b|kb|mb|gb)?$" "b"
+
+        def limitup $limitup "10240"
+        def limitdown $limitdown "10240"
+        def flowsup $flowsup "1024"
+        def flowsdown $flowsdown "1024"
+        def fqup $fqup "1514"
+        def fqdown $fqdown "1514"
+
+        [ -n "$str" ] && str+=','
+        str+="{\"protocol\":\"$sql\",\"rate-up\":\"$uprate\",\"suffix-rate-up\":\"$upsuffix\",\"rate-down\":\"$downrate\",\"suffix-rate-down\":\"$downsuffix\""
+        str+=",\"burst\":\"$burst\",\"ecn-up\":\"$ecnup\",\"ecn-down\":\"$ecndown\",\"flows-up\":\"$flowsup\",\"flows-down\":\"$flowsdown\",\"limit-up\":\"$limitup\", \"limit-down\":\"$limitdown\""
+        str+=",\"fq-up\":\"$fqup\",\"fq-down\":\"$fqdown\",\"htb-up\":\"$htbup\",\"htb-down\":\"$htbdown\""
+        str+=",\"target-up\":\"$targetup\",\"suffix-target-up\":\"$targetsuffixup\",\"target-down\":\"$targetdown\",\"suffix-target-down\":\"$targetsuffixdown\""
+        str+=",\"interval-up\":\"$intervalup\",\"suffix-interval-up\":\"$intervalsuffixup\",\"interval-down\":\"$intervaldown\",\"suffix-interval-down\":\"$intervalsuffixdown\""
+        str+=",\"burst-up\":\"$burstup\",\"suffix-burst-up\":\"$burstsuffixup\",\"burst-down\":\"$burstdown\",\"suffix-burst-down\":\"$burstsuffixdown\""
+
+        if [[ $uprate != '' ]]; then
+            str+=",\"up\":\"true\""
+        else
+            str+=",\"up\":\"\""
+        fi
+
+        if [[ $downrate != '' ]]; then
+            str+=",\"down\":\"true\""
+        else
+            str+=",\"down\":\"\""
+        fi
+
+        str+=",\"interfaces\":\"$sqlintf\"}"
+    done
+
+    intfs=($(ls /sys/class/net/ | grep -v '^lo$' | grep -v '^bonding_masters$'))
+    ilist=''
+    for int in "${intfs[@]}"; do
+        [ -n "$ilist" ] && ilist+=','
+        ilist+="\"$int\""
+    done
+    ilist="{\"options\":[$ilist],\"other\":\"true\"}"
+
+    echo -n "{\"success\":\"1\",\"data\":{\"sql-config\":[$str]},"
+    echo "\"definition\":{\"interfaces\":$ilist},"
+    echo "\"deletable\":\"1\"}"
+}
+
+suffix () {
+    local res="^([0-9]*(\.)?[0-9]+)(([K|M|G|T|k|m|g|t]i?)?(bps|bit))$"
+    local red="^([0-9]*(\.)?[0-9]+)$"
+    local num=$1
+    local unit=''
+    local rate=''
+    local unitr=$2
+    local rater=$3
+
+    if [[ $num =~ $res ]]; then
+        if [[ ${BASH_REMATCH[3],,} = "kbit" ]] || [[ ${BASH_REMATCH[3],,} = "mbit" ]]; then
+            rate=${BASH_REMATCH[1]}
+            unit=${BASH_REMATCH[3],,}
+        else
+            unit="bit"
+            if [[ ${BASH_REMATCH[2]} = "." ]]; then
+                rate="${BASH_REMATCH[1]}*${units[${BASH_REMATCH[3],,}]}"
+            else
+                rate=$((${BASH_REMATCH[1]}*${units[${BASH_REMATCH[3],,}]}))
+            fi
+        fi
+    elif [[ $num =~ $red ]]; then
+        unit="kbit"
+        if [[ ${BASH_REMATCH[2]} = "." ]]; then
+            rate="${BASH_REMATCH[1]}*8"
+        else
+            rate=$((8*${BASH_REMATCH[1]}))
+        fi
+    else
+        rate=$num
+    fi
+
+    eval "$rater=($rate)"
+    eval "$unitr=($unit)"
+}
+
+parse () {
+    local index=$1
+    local var=$2
+    local result=$3
+
+    eval "val=($(cat $INPUT | jq -r --arg i "$index" --arg var "$var" '."sql-config"[$i | tonumber][$var]'))"
+    eval "$result=($val)"
+}
+
+apply () {
+    local ret=0
+    local output=''
+    declare -a directs=("up" "down")
+
+    eval "sqls=($(cat $INPUT | jq '."sql-config"[]."protocol"'))"
+
+    for ((i = 0; i < ${#sqls[@]}; i++)); do
+        parse $i "up" enableUpload
+        parse $i "down" enableDownload
+        if [[ "$enableUpload" != "true" ]] && [[ "$enableDownload" != "true" ]]; then
+            output="Each policy must set Upload and/or Download."
+            ret=1
+            break
+        fi
+    done
+
+    if [ $ret = 0 ]; then
+        tfile=$(mktemp)
+        (
+        $cmd begin
+        ret=0
+        $cmd delete $pfx || ret=1
+
+        for ((i = 0; i < ${#sqls[@]}; i++)); do
+            eval "protocol=($(cat $INPUT | jq -r --arg i "$i" '."sql-config"[$i | tonumber]."protocol"' | sed 's/\$/\\$/g;s/`/\\`/g'))"
+            eval "interface=($(cat $INPUT | jq -r --arg i "$i" '."sql-config"[$i | tonumber]."interfaces"'))"
+
+            if [[ $protocol != '' ]]; then
+                if ! $cmd set $pfx $protocol; then
+                    ret=1
+                    break
+                fi
+
+                if ! $cmd set $pfx "$protocol" wan-interface $interface; then
+                    ret=1
+                    break
+                fi
+
+                for direct in "${directs[@]}"; do
+                    local d="$direct""load"
+
+                    parse $i "$direct" enableDirect
+
+                    if [[ "$enableDirect" = "true" ]]; then
+
+                        parse $i "rate-$direct" rate
+                        parse $i "suffix-rate-$direct" srate
+                        parse $i "burst-$direct" burst
+                        parse $i "suffix-burst-$direct" sburst
+                        parse $i "target-$direct" target
+                        parse $i "suffix-target-$direct" starget
+                        parse $i "interval-$direct" interval
+                        parse $i "suffix-interval-$direct" sinterval
+
+                        parse $i "ecn-$direct" ecn
+                        parse $i "flows-$direct" flows
+                        parse $i "limit-$direct" limit
+                        parse $i "fq-$direct" fq
+                        parse $i "htb-$direct" htb
+
+                        if [[ $rate != "" ]]; then
+                            if ! $cmd set $pfx $protocol $d rate "$rate$srate"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $burst != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d burst "$burst$sburst"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $target != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d target "$target$starget"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $interval != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d interval "$interval$sinterval"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $flows != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d flows "$flows"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $limit != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d limit "$limit"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $ecn = "null" ]]; then
+                            if ! $cmd set $pfx $protocol $d ecn disable; then
+                                ret=1
+                                break
+                            fi
+                        elif [[ $ecn = 'enable' ]]; then
+                            if ! $cmd set $pfx $protocol $d ecn enable; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $fq != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d "fq-quantum" "$fq"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                        if [[ $htb != '' ]]; then
+                            if ! $cmd set $pfx $protocol $d "htb-quantum" "$htb"; then
+                                ret=1
+                                break
+                            fi
+                        fi
+
+                    fi
+                done
+            fi
+        done
+
+        if [ $ret == 0 ]; then
+            $cmd commit || ret=1
+        fi
+        if [ $ret == 0 ]; then
+            $cmd save || ret=1
+        fi
+        $cmd end
+        exit $ret
+        ) >$tfile 2>&1
+        ret=$?
+
+        output=$(cat $tfile)
+        rm -f $tfile
+
+    fi
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": \"${output//\"/\'}\"}"
+    fi
+}
+
+delete () {
+    local ret=0
+    local output=''
+
+    tfile=$(mktemp)
+    (
+    $cmd begin
+    ret=0
+    $cmd delete $pfx || ret=1
+
+    if [ $ret == 0 ]; then
+        $cmd commit || ret=1
+    fi
+    if [ $ret == 0 ]; then
+        $cmd save || ret=1
+    fi
+    $cmd end
+    exit $ret
+    ) >$tfile 2>&1
+    ret=$?
+
+    output=$(cat $tfile | jenc)
+    rm -f $tfile
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": \"${output//\"/\'}\"}"
+    fi
+}
+
+case "$ACTION" in
+    load)
+        load
+        ;;
+    apply)
+        apply
+        ;;
+    delete)
+        delete
+        ;;
+esac

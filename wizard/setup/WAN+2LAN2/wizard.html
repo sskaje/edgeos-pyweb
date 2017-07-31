@@ -1,0 +1,493 @@
+<script type="text/javascript">
+$(function() {
+    var $optional = $('fieldset.optional'),
+        $bridge = $('fieldset.bridge'),
+        $ethernets = $('fieldset.ethernet'),
+        $lan1 = $('.reset-manual span.lan1'),
+        $lan2 = $('.reset-manual span.lan2'),
+        $lanbr = $('.reset-manual span.lanbr'),
+        $lanpts = $('.reset-manual .lan-ports'),
+        $brpt = $('.reset-manual .br-ports'),
+        $ipv6_lans = $('input[name=ipv6-lans]'),
+        $intf = $('select[name=internet-interface]'),
+        $pd_preflen = $('select[name=prefix]')
+    ;
+
+    var default_ports = 'eth2, eth3 and eth4';
+    var eth4 = 'eth1, eth2 and eth3';
+    var sfp = 'eth1, eth2, eth3 and eth4';
+
+    var one_lan_def = 'eth1, eth2, eth3 and eth4';
+    var one_lan_eth4 = 'eth0, eth1, eth2 and eth3';
+    var one_lan_sfp = 'eth0, eth1, eth2, eth3 and eth4';
+
+    $('.lan-interfaces').text(default_ports);
+    $('.one-lan-interfaces').text(one_lan_def);
+
+    if ($('body').hasClass('port5A') || $('body').hasClass('port6') || $('body').hasClass('port6A')) {
+        $('fieldset.optional[name=br]').remove();
+    } else {
+        $('fieldset.optional[name=lans]').remove();
+    }
+
+    $intf
+        .on('change', function() {
+            if ($('body').hasClass('port5A') || $('body').hasClass('port6') || $('body').hasClass('port6A')) {
+                showIpv6Lans($optional.find('input[type="checkbox"][name="lan"]').is(':checked'), $(this).val(), $pd_preflen.val());
+            } else {
+                showIpv6Lans($optional.find('input[type="checkbox"][name="bridge"]').is(':checked'), $(this).val(), $pd_preflen.val());
+            }
+
+            if ($('body').hasClass('port9')) {
+                if ($(this).val() == 'eth0') {
+                    $('.infinity-lan1').text('eth1');
+                    $('.infinity-lan2').text('eth2');
+                    $('.infinity-br').text('eth1 and eth2');
+                } else if ($(this).val() == 'eth1') {
+                    $('.infinity-lan1').text('eth0');
+                    $('.infinity-lan2').text('eth2');
+                    $('.infinity-br').text('eth0 and eth2');
+                }
+            } else {
+                if ($(this).val() == 'eth0') {
+                    $('.lan-interfaces').text(default_ports);
+                    $('.nsfp-list').show();
+                    $('.sfp-list').hide();
+                    $('.one-lan-interfaces').text(one_lan_def);
+                    lan1 = $('.nsfp-list').html();
+                } else if ($(this).val() == 'eth4' || $(this).val() == 'eth5') {
+                    $('.sfp-list').show();
+                    $('.nsfp-list').hide();
+                    lan1 = $('.sfp-list').html();
+
+                    if ($(this).val() == 'eth4') {
+                        $('.lan-interfaces').text(eth4);
+                        $('.one-lan-interfaces').text(one_lan_eth4);
+                    } else {
+                        $('.lan-interfaces').text(sfp);
+                        $('.one-lan-interfaces').text(one_lan_sfp);
+                    }
+                }
+            }
+        })
+        .trigger('change')
+    ;
+
+    $pd_preflen
+        .on('change', function() {
+            if ($('body').hasClass('port5A') || $('body').hasClass('port6') || $('body').hasClass('port6A')) {
+                showIpv6Lans($optional.find('input[type="checkbox"][name="lan"]').is(':checked'), $intf.val(), $(this).val());
+            } else {
+                showIpv6Lans($optional.find('input[type="checkbox"][name="bridge"]').is(':checked'), $intf.val(), $(this).val());
+            }
+        })
+        .trigger('change')
+    ;
+
+    $('.port5-interface').hide();
+    $('.port6-interface').hide();
+    $('.port9-interface').hide();
+
+    if ($('body').hasClass('port6') ||
+            $('body').hasClass('port6A') ||
+            $('body').hasClass('port9') ||
+            $('body').hasClass('port5A')) {
+
+        $('.extra-interface').show();
+
+        if ($('body').hasClass('port5A')) {
+            $('.port5-interface').show();
+        } else if ($('body').hasClass('port9')) {
+            var internetIface = $('.port9-interface');
+            internetIface.show();
+            // Prefer SFP+ port to MGMT port eth0
+            internetIface.parent().val('eth1');
+
+        } else {
+            $('.port6-interface').show();
+        }
+    } else {
+        $('.extra-interface').hide();
+    }
+
+    $optional.find('input[type="checkbox"][name="bridge"]')
+        .on('change', function() {
+            $this = $(this);
+            var checked = $this.is(':checked');
+            showIpv6Lans(checked, $intf.val(), $pd_preflen.val());
+
+            if (checked) {
+                $bridge.show();
+                $ethernets.hide();
+                $lanpts.hide();
+                $brpt.show();
+            } else {
+                $bridge.hide();
+                $ethernets.show();
+                $lanpts.show();
+                $brpt.hide();
+            }
+        })
+        .trigger('change')
+    ;
+
+    $optional.find('input[type="checkbox"][name="lan"]')
+        .on('change', function() {
+            $this = $(this);
+            var checked = $this.is(':checked');
+            showIpv6Lans(checked, $intf.val(), $pd_preflen.val());
+
+            if (checked) {
+                $bridge.show();
+                $ethernets.hide();
+                $lanpts.hide();
+                $brpt.show();
+            } else {
+                $bridge.hide();
+                $ethernets.show();
+                $lanpts.show();
+                $brpt.hide();
+            }
+        })
+        .trigger('click')
+    ;
+
+    if ($('body').hasClass('port5A')) {
+        $('fieldset[name=br]').remove();
+        $bridge.show();
+        $ethernets.hide();
+        $lanpts.hide();
+        $brpt.show();
+    }
+
+    $ethernets.find('input[name=eth1-static-address]')
+        .on('change', function() {
+            $lan1.html($(this).val());
+        })
+    ;
+
+    $ethernets.find('input[name=eth2-static-address]')
+        .on('change', function() {
+            $lan2.html($(this).val());
+        })
+    ;
+
+    $bridge.find('input[name=br-static-address]')
+        .on('change', function() {
+            $lanbr.html($(this).val());
+        })
+    ;
+
+    /**
+     * @param is_bridge if only one lan or if using bridge, set to true
+     * @param pd_preflen is the prefix length
+     */
+    function showIpv6Lans(is_bridge, intf, pd_preflen) {
+        var ret = [];
+
+        console.log(pd_preflen);
+
+        if ($('body').hasClass('port5A') || $('body').hasClass('port6') || $('body').hasClass('port6A')) {
+            if (pd_preflen == '/64') {
+                ret.push('switch0');
+            } else {
+                if (is_bridge) {
+                    ret.push('switch0');
+                } else {
+                    if (intf == 'eth0') {
+                        ret.push('eth1');
+                    } else {
+                        ret.push('eth0');
+                    }
+                    ret.push('switch0');
+                }
+            }
+        } else if ($('body').hasClass('port5')) {
+            if (is_bridge) {
+                ret.push('br0');
+            } else {
+                if (pd_preflen == '/64') {
+                    ret.push('switch0');
+                } else {
+                    ret.push('eth1');
+                    ret.push('switch0');
+                }
+            }
+        } else if ($('body').hasClass('port9')) {
+            if (is_bridge) {
+                ret.push('br0');
+            } else {
+                if (intf == 'eth0') {
+                    ret.push('eth1');
+                } else {
+                    ret.push('eth0');
+                }
+
+                if (pd_preflen != '/64') {
+                    ret.push('eth2');
+                }
+            }
+        } else {
+            if (is_bridge) {
+                ret.push('br0');
+            } else {
+                ret.push('eth1');
+
+                if (pd_preflen != '/64') {
+                    ret.push('eth2');
+                }
+            }
+        }
+
+        $ipv6_lans.val(ret.join(', '));
+    }
+});
+</script>
+
+<div class="instructions" data-reboot="true">
+    Use this wizard to set up basic Internet connectivity and to customize local network settings
+</div>
+
+<fieldset name="eth0" class="primary expanded">
+    <legend>Internet port (eth0<span class="extra-interface">&nbsp;or <span class="port9-interface">eth1</span><span class='port5-interface'>eth4</span><span class='port6-interface'>eth5/SFP</span></span>)</legend>
+    
+    <div class="instructions">
+        Connect eth0<span class="extra-interface">&nbsp;or <span class="port9-interface">eth1</span><span class='port5-interface'>eth4</span><span class='port6-interface'>eth5/SFP</span></span> to your Internet connection, for example, the cable modem or DSL modem, and select the connection type.
+    </div>
+
+    <div class="extra-interface">
+        <label><span>Port</span> <select name="internet-interface">
+            <option value="eth0">eth0</option>
+            <option class='port6-interface' value="eth5">eth5/SFP</option>
+            <option class='port5-interface' value='eth4'>eth4</option>
+            <option class='port9-interface' value='eth1'>eth1</option>
+        </select></label>
+    </div>
+
+    <div class="grouped">
+        <div class="label"><span>Internet connection type</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="eth0-wan-options" value="dhcp" checked="checked" />DHCP <span class="populate eth0-dhcp-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled">
+            <label>Automatically obtain network settings from the Internet Service Provider</label>
+            </div>
+
+            <label><input type="radio" name="eth0-wan-options" value="static" />Static IP</label>
+            <div class="nested toggled hidden">
+                <label>Static network settings provided by the Internet Service Provider<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">Address</span></div>
+                    <div><span><input type="text" name="eth0-static-address" value="" data-infotip='IP address (e.g., 12.34.56.78)' /></span></div>
+                    <div><span class="text"> / </span></div>
+                    <div><span><input type="text" name="eth0-static-mask" value="" data-infotip='Network mask (e.g., 255.255.255.0) or prefix length (e.g., 24)' /></span></div>
+                </label>
+                <label><div class="title"><span class="text">Gateway</span></div><div> <input type="text" name="eth0-static-gateway" value="" data-infotip='IP address of gateway (e.g., 12.34.56.78)' /></div></label>
+                <label><div class="title"><span class="text">DNS server</span></div><div> <input type="text" name="eth0-static-dns" value="" data-infotip='IP address of DNS server (e.g., 12.34.56.78)' /></div></label>
+            </div>
+            
+            <label><input type="radio" name="eth0-wan-options" value="pppoe" />PPPoE <span class="populate eth0-pppoe-addr">Current IP: <span class="value">Unavailable</span></span></label>
+            <div class="nested toggled hidden">
+                <label>PPPoE account name and password provided by the Internet Service Provider<br /><br /></label>
+                <label><div class="title"><span class="text">Account name</span></div><div> <input type="text" name="eth0-pppoe-userid" value="" data-infotip="Account name for PPPoE"/></div></label>
+                <label><div class="title"><span class="text">Password</span></div><div> <input type="password" name="eth0-pppoe-password" value="" data-infotip="Password for PPPoE" data-group="pppoe" /></div><label class="in-line"><input style="margin-left:20px !important;" type="checkbox" name="show-password" data-group="pppoe" />show password</label></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="checkbox-toggle fullwidth">
+        <label>
+            <span class="label">VLAN</span>
+            <input type="checkbox" name="eth0-use-vlan" value="1" />
+            <span>Internet connection is on VLAN</span>
+        </label>
+        <div class="toggled nested hidden margin113">
+            <div>
+                <label>
+                    <span class="label">VLAN ID</span>
+                    <input type="text" name="eth0-number-vlan" />
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <label><span>Firewall</span> <input type="checkbox" name="eth0-enable-default-firewall" value="true" checked="checked" /> <span class="note">Enable the default firewall</span></label>
+    <div class="checkbox-toggle fullwidth">
+        <label>
+            <span class="label">DHCPv6 PD</span>
+            <input type="checkbox" name="ipv6pd" value="1" />
+            <span>Enable DHCPv6 Prefix Delegation</span>
+        </label>
+        <div class="toggled nested hidden margin113">
+            <div>
+                <label><span class="label">Prefix length</span></label>
+                <div>
+                    <span><select name="prefix">
+                        <option value="/48">/48</option>
+                        <option value="/56">/56</option>
+                        <option value="/60">/60</option>
+                        <option value="/64">/64</option>
+                    </select></span>
+                </div>
+                <label>
+                    <span class="label">Firewall</span>
+                    <input type="checkbox" name="enable-ipv6-firewall" value="true" checked="checked" />
+                    <span class="note">Enable the default IPv6 firewall</span>
+                </label>
+                <label>
+                    <span class="label">IPv6 LANs</span>
+                    <input type="text" readonly name="ipv6-lans" />
+                </label>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset name="br" class="optional">
+    <label class="title">
+        <span class="text">Bridging</span>
+        <input type="checkbox" name="bridge" value="true" />
+        <span class="text">Bridge LAN interfaces into a single network</span>
+    </label>
+    <label>
+    <br />
+    <b>Note:</b>
+    Enabling bridging will have performance impact since it is basically
+    doing the task of a switch in software, and therefore
+    it is better in most cases to use an actual switch instead.
+    However, it might be useful
+    if the extra port provided by bridging is required
+    and the performance impact is acceptable, for example.
+    </label>
+</fieldset>
+
+<fieldset name="lans" class="optional">
+    <label class="title">
+        <span class="text">One LAN</span>
+        <input type="checkbox" name="lan" value="true" />
+        <span class="text">Only use one LAN</span>
+    </label>
+</fieldset>
+
+
+<fieldset class="primary bridge">
+    <legend><span class="blacklist port5">LAN Ports (<span class="infinity-br">eth1 and eth2</span>)</span><span class="whitelist port5">LAN Ports (<span class="one-lan-interfaces"></span>)</span></legend>
+
+    <div class="instructions">
+        <span>
+        Connect the LAN ports to your devices or/and a switch that connects to additional devices.
+        </span>
+    </div>
+
+    <label>
+        <span class="text">Address</span>
+        <span><input type="text" name="br-static-address" value="192.168.1.1" /></span>
+        <span class="text"> / </span>
+        <span><input type="text" name="br-static-mask" value="255.255.255.0" /></span>
+    </label>
+    <label><span>DHCP</span> <input type="checkbox" name="br-dhcp-server" value="true" checked="checked" /> <span class="note">Enable the DHCP server</span></label>
+</fieldset>
+
+<fieldset name="eth1" class="primary ethernet">
+    <legend><span class="blacklist port5">LAN port (<span class="infinity-lan1">eth1</span>)</span><span class="whitelist port5">(Optional) Secondary LAN port (<span class="sfp-list">eth0</span><span class="nsfp-list">eth1</span>)</span></legend>
+
+    <div class="instructions">
+        <span class="blacklist port5">
+        Connect eth1 to your local network, for example, a switch that connects to your devices.
+        </span>
+        <span class="whitelist port5">
+        Optionally, connect eth1 to your secondary local network.
+        </span>
+    </div>
+
+    <label>
+        <div class="title"><span class="text">Address</span></div>
+        <div><span><input type="text" name="eth1-static-address" value="192.168.1.1" /></span></div>
+        <div><span> / </span></div>
+        <div><span><input type="text" name="eth1-static-mask" value="255.255.255.0" /></span></div>
+    </label>
+    <label><span>DHCP</span> <input type="checkbox" name="eth1-dhcp-server" value="true" checked="checked" /> <span class="note">Enable the DHCP server</span></label>
+</fieldset>
+
+<fieldset name="eth2" class="primary ethernet">
+    <legend><span class="blacklist port5">(Optional) Secondary LAN port (<span class="infinity-lan2">eth2</span>)</span><span class="whitelist port5">LAN ports (<span class='lan-interfaces'></span>)</span></legend>
+
+    <div class="instructions">
+        <span class="blacklist port5">
+        Optionally, connect eth2 to your secondary local network.
+        </span>
+        <span class="whitelist port5">
+        Connect the LAN ports to your devices or/and a switch that connects to additional devices.
+        </span>
+    </div>
+    
+    <label>
+        <span class="text">Address</span>
+        <span><input type="text" name="eth2-static-address" value="192.168.2.1" /></span>
+        <span class="text"> / </span>
+        <span><input type="text" name="eth2-static-mask" value="255.255.255.0" /></span>
+    </label>
+    <label><span>DHCP</span> <input type="checkbox" name="eth2-dhcp-server" value="true" checked="checked" /> <span class="note">Enable the DHCP server</span></label>
+</fieldset>
+
+<fieldset name="user" class="primary expanded">
+    <legend><span>User setup</span></legend>
+    <div class="instructions">
+        <span>
+        Setup user and password for the new router config.
+        </span>
+    </div>
+    <div class="grouped">
+        <div class="label"><span>User</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="user-options" value="ubnt" checked="checked" />Use default user</label>
+            <div class="nested toggled">
+                <label>Use default user and password for the router. Password could be customized optionally.<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">User</span></div>
+                    <div> <input type="text" name="ubnt-user" value="ubnt" disabled /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Password</span></div>
+                    <div> <input type="password" name="ubnt-password" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Confirm Password</span></div>
+                    <div> <input type="password" name="ubnt-confirm-password" /></div>
+                </label>
+            </div>
+            <label><input type="radio" name="user-options" value="new" />Create new admin user</label>
+            <div class="nested toggled">
+                <label>Create new admin user. Note: default user(ubnt) will be removed.<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">User</span></div>
+                    <div><input type="text" name="new-user" value="" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Password</span></div>
+                    <div> <input type="password" name="new-password" value="" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Confirm Password</span></div>
+                    <div> <input type="password" name="new-confirm-password" value='' /></div>
+                </label>
+            </div>
+            <label><input type="radio" name="user-options" value="old" />Keep existing users</label>
+            <div class="nested toggled">
+                <label>Keep existing users and passwords on the router.<br /><br /></label>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<div class="reset-manual hidden" data-reboot="true">
+    <p>The current configuration will be replaced and a reboot is required
+    for the new configuration to take effect. To reconnect to the router
+    after the reboot:</p>
+    <ul>
+        <li>Connect the client device (e.g., laptop) to one of the LAN ports.</li>
+        <li>Set the client device to use DHCP to obtain an IP from the router.
+            (If DHCP server for LAN is not enabled, set a static IP.)</li>
+        <li class="lan-ports">Use browser to go to "https://<span class="lan1">192.168.1.1</span>" or "https://<span class="lan2">192.168.2.1</span>" (depending on to which port the client is connected).</li>
+        <li class="br-ports">Use browser to go to "https://<span class="lanbr">192.168.1.1</span>".</li>
+    </ul>
+</div>

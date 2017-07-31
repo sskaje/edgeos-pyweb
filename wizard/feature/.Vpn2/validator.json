@@ -1,0 +1,22 @@
+{
+	"rules": {
+		"src": {
+			"required": true,
+            "ipv4OrIpv6OrAny": 1
+		},
+		"dest": {
+			"required": true
+		},
+		"pw": {
+			"required": true
+		},
+		"srcsub": {
+			"required": true,
+            "ipv4OrIpv6Net": 1
+		},
+        "destsub": {
+            "required": true,
+            "ipv4OrIpv6Net": 1
+        }
+	}
+}

@@ -1,0 +1,70 @@
+<div id="QuickInfoPanel" class="unrendered"></div>
+
+<!-- Start: Quick Info Panel -->
+<script id="QuickInfoTemplate" type="text/template">
+  <div class="quick-info-details unlabeled">
+    <div class="ports-label quick-info-label">Ports</div>
+    <div class="diagram">
+      <ol>
+        %for i in range(ports):
+        <li>
+          <div class="port">Port {{ i }}</div>
+        </li>
+        %end
+      </ol>
+    </div>
+
+    <div class="status-label quick-info-label">Status</div>
+    <dl class="status">
+      <dt>CPU:</dt>
+      <dd>
+        <div class="cpu-progress-bar"></div>
+        <div class="cpu-progress-label">100%</div>
+        <div class="cpu-temp-label"></div>
+      </dd>
+      <dt>RAM:</dt>
+      <dd>
+        <div class="ram-progress-bar"></div>
+        <div class="ram-progress-label">100%</div>
+      </dd>
+      <dt>Uptime:</dt>
+      <dd class="uptime"></dd>
+    </dl>
+  </div>
+</script>
+<!-- End: Quick Info Panel -->
+
+<!-- Start: Interface Tooltip Template -->
+<script id="QuickInfoInterfaceTooltipTemplate" type="text/template">
+  <div class="interface-tooltip <%= className %>">
+    <strong>Port <%= portName %></strong>
+    <dl class="status">
+      <dt><%= admin %></dt>
+    </dl>
+    <dl class="standard">
+      <dt>Link:</dt>
+      <dd><%= link %></dd>
+      <dt>Speed:</dt>
+      <dd><%= speed %></dd>
+      %if poe:
+        <dt>PoE:</dt>
+        <dd><%= poe %></dd>
+      %end
+    </dl>
+    <dl class="sfp">
+      <dt>Vendor:</dt>
+      <dd><%= vendor %>
+      <dt>Part:</dt>
+      <dd><%= part %>
+      \<% if (typeof temp !== 'undefined') { %>
+        <dt>Temp:</dt>
+        <dd><%= temp %></dd>
+      \<% }; %>
+      \<% if (typeof tx_power !== 'undefined') { %>
+        <dt>Tx/Rx Power:</dt>
+        <dd><%= tx_power %>/<%= rx_power %></dd>
+      \<% }; %>
+    </dl>
+  </div>
+</script>
+<!-- End: Interface Tooltip Template -->

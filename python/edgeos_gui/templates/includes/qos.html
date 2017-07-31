@@ -1,0 +1,770 @@
+<div id="Qos" class="main-section">
+    <div class="section-tabs">
+        <ul>
+            <li><a href="#QoS/SmartQueue" data-container="QosSmartQueue">Smart Queue</a></li>
+            <li><a href="#QoS/BasicQueue" data-container="QosBasicQueue">Basic Queue</a></li>
+            <li><a href="#QoS/AdvancedQueue" data-container="QosAdvancedQueue">Advanced Queue</a></li>
+        </ul>
+    </div>
+    <div class="section-container tall tabbed">
+        <div id="QosSmartQueue" class="wide tall ui-layout-pane"></div>
+        <div id="QosAdvancedQueue" class="wide tall ui-layout-pane"></div>
+        <div id="QosBasicQueue" class="wide tall ui-layout-pane"></div>
+    </div>
+</div>
+
+<script id="QosSmartQueueTemplate" type="text/template">
+    <div class="section-container service-form">
+        <form method="post" class="ui-form"></form>
+    </div>
+</script>
+
+<script id="QosAdvancedQueueTemplate" type="text/template">
+    <div class="ui-layout-center" id="QosAdvancedQueueCanvas">
+        <div class="canvas tall"></div>
+        <div id="QosAdvancedQueueConfig">
+            <div class='drop-down-button'></div>
+        </div>
+        <div class="takeover hyperlink">
+            Legend and Instructions
+        </div>
+    </div>
+    <div class="ui-layout-east" id="QosAdvancedQueueTypes"></div>
+</script>
+
+<script id="QosAdvancedQueueTypesTemplate" type="text/template">
+    <div class="section-container">
+        <div class="table-container">
+            <div id="QosAdvancedQueueTypeAdd" class="add">
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</script>
+
+
+<script id="QosBasicQueueTemplate" type="text/template">
+    <div class="section-container">
+        <form method="post" class="ui-form"></form>
+    </div>
+</script>
+
+<script id="QosBasicQueueEditContainerTemplate" type="text/template">
+    <tr class="edit-container">
+        <td colspan="20"></td>
+    </tr>
+</script>
+
+<script id="QosBasicQueueRateEditTemplate" type="text/template">
+    <div class="list">
+        <div class="entry">
+            <label><span class="text">rate</span></label>
+            <div><input class="small" type="text" name="rate" /></div>
+            <div><select name="suffix-rate" >
+                <option value='bit'>bits/sec</option>
+                <option value='kbit'>Kbits/sec</option>
+                <option value='mbit'>Mbits/sec</option>
+            </select></div>
+        </div>
+
+        <div class="entry">
+            <label><span class="text">burst rate</span></label>
+            <div><input class="small" name="burst-rate" type="text" /></div>
+            <div><select class="suffix" name="suffix-burst-rate">
+
+                <option value='bit'>bits/sec</option>
+                <option value='kbit'>Kbits/sec</option>
+                <option value='mbit'>Mbits/sec</option>
+            </select></div>
+        </div>
+
+        <div class="entry">
+            <label><span class="text">burst size</span></label>
+            <div><input class="small" name="burst-size" type="text" /></div>
+            <div><select class="suffix" name="suffix-burst-size">
+
+                <option value='b'>bytes</option>
+                <option value='kb'>Kbytes</option>
+                <option value='mb'>Mbytes</option>
+            </select></div>
+        </div>
+    </div>
+</script>
+
+<script id="QosBasicQueueQtypeEditTemplate" type="text/template">
+    <div class="list">
+        <div><%= title %></div>
+        <div class="clear">
+            <div class="entry">
+                <label><span class="text">subnet</span></label>
+                <div><input class="small" name="hfq_subnet" type="text" /></div>
+            </div>
+
+            <div class="entry">
+                <label><span class="text">max rate</span></label>
+                <div><input class="small" name="hfq_max" type="text"
+                    data-infotip="Bandwidth limit per host in &quot;bits per second&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" /></div>
+            </div>
+
+            <div class="entry">
+                <label><span class="text">id</span></label>
+                <div><select name="hfq_id">
+                    <option value="sip">Source IP</option>
+                    <option value="dip">Destination IP</option>
+                </select></div>
+            </div>
+
+            <div class="entry">
+                <label><span class="text">Burst Rate</span></label>
+                <div><input type="text" name="hfq_brate" class="small"
+                    data-infotip="Burst rate per host in &quot;bits per second&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" /></div>
+            </div>
+
+            <div class="entry">
+                <label><span class="text">Burst Size</span></label>
+                <div><input type="text" name="hfq_bsize" class="small"
+                    data-infotip="Burst size per host in &quot;bytes&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" /></div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="QosAdvancedQueueInstructionsTemplate" type="text/template">
+    <div>
+        <legend>Legend</legend>
+        <ul class="legend">
+            <li>
+                <div class="circle config"></div>
+                <div class="note">Config</div>
+                <div class="clear"></div>
+            </li>
+            <li>
+                <div class="circle interface"></div>
+                <div class="note">Interfaces that root nodes are connected to</div>
+                <div class="clear"></div>
+            </li>
+            <li>
+                <div class="circle root"></div>
+                <div class="note">Root nodes</div>
+                <div class="clear"></div>
+            </li>
+            <li>
+                <div class="circle branch"></div>
+                <div class="note">Branch nodes</div>
+                <div class="clear"></div>
+            </li>
+            <li>
+                <div class="circle leaf"></div>
+                <div class="note">Leaf nodes</div>
+                <div class="clear"></div>
+            </li>
+        </ul>
+        <legend>Instructions</legend>
+        <ul class="instruction">
+            <li>
+                <div><b>To add a root node</b>, click <i>config</i> in the diagram and then select <i>Add Root</i> from the dropdown.</div>
+            </li>
+            <li>
+                <div><b>To add a branch/leaf node</b>, click the text next to the node that the added node will be attached to then select <i>Add Branch</i> or <i>Add Leaf</i> repectively.</div>
+            </li>
+            <li>
+                <div><b>To edit config or delete the node</b>, click the text next to the node. If a node is deleted, all descendants and corresponding filters will be deleted as well.</div>
+            </li>
+            <li>
+                <div><b>To view all filters attached to a node</b>, click the text next to the node and then select <i>Show Filters</i>. The target of a filter could be any descendant of the selected node.</div>
+            </li>
+            <li>
+                <div><b>To change the interface that a root node is attached to</b>, change it in the <i>Config</i> of that root node.</div>
+            </li>
+            <li>
+                <div><b>To change the parent of a branch/leaf node</b>, drag the node to the desired parent node. Corresponding filters will be deleted.</div>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script id="QosAdvancedQueueTypeConfigTemplate" type="text/template">
+    <form method="post" class="ui-form">
+        <div class="scrollable">
+            <div class="tab-content basic">
+                <fieldset class="primary">
+                    <label class="primary">Name</label>
+                    <div>
+                        <span class='qid'><%= qid %></span>
+                        <input type="text" name="qid" id="qid" class="text-input" data-infotip="Unique among all queue types." />
+                    </div>
+
+                    <label class="primary">Type</label>
+                    <div>
+                        <span><%= subType %></span>
+                    </div>
+
+\<% if (subType === 'FQ_CODEL') { %>
+                    <label class="primary" for="target<%= qid %>">Target</label>
+                    <div>
+                        <div class="inline">
+                            <input type="text" name="target" id="target<%= qid %>" class="text-input" />
+                        </div>
+                        <div class="inline suffix">
+                            <select name="target-unit" class="suffix" data-infotip="Acceptable minimum queue delay.<br />Allowed target range: 10us - 10s.">
+                                <option value="us">microseconds (us)</option>
+                                <option value="ms" selected>milliseconds (ms)</option>
+                                <option value="secs">seconds</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="primary" for="interval<%= qid %>">Interval</label>
+                    <div>
+                        <div class="inline">
+                            <input type="text" name="interval" id="interval<%= qid %>" class="text-input" />
+                        </div>
+                        <div class="inline suffix">
+                            <select class="suffix" name="interval-unit"
+                                data-infotip="Enter dropping mode when the minimum queue delay has exceeded target for a time greater than configured interval.
+                                <br />Allowed interval range: 1ms - 20s.">
+                                <option value="us">microseconds (us)</option>
+                                <option value="ms" selected>milliseconds (ms)</option>
+                                <option value="secs">seconds</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="primary" for="ecn<%= qid %>">ECN</label>
+                    <div class="inline">
+                        <input type="checkbox" name='ecn' id="ecn<%= qid %>" checked />
+                    </div>
+                    <div class="inline suffix">
+                        <span>Enable (Mark packets instead of dropping them)</span>
+                    </div>
+
+                    <label class="primary" for="flows<%= qid %>">Flows</label>
+                    <div>
+                        <input type="text" name="flows" id="flows<%= qid %>" class="text-input"
+                            data-infotip="Number of flows into which the incoming packets are classified.<br />Flow number: 1-65535" />
+                    </div>
+
+                    <label class="primary" for="limit<%= qid %>">Limit</label>
+                    <div class="inline">
+                        <input type="text" name="limit" id="limit<%= qid %>" class="text-input" />
+                    </div>
+                    <div class="inline suffix">
+                        <span data-infotip="Hard limit on the real queue size (packets).<br />Queue size in packets: 1-1000000.">packets</span>
+                    </div>
+
+                    <label class="primary" for="quantum<%= qid %>">Quantum</label>
+                    <div class="inline">
+                        <input type="text" name="quantum" id="quantum<%= qid %>" class="text-input" />
+                    </div>
+                    <div class="inline suffix">
+                        <span data-infotip="Packet scheduling quantum for FQ_CODEL<br />Packet scheduling quantum (bytes): 256-65535">Bytes</span>
+                    </div>
+                    </div>
+\<% } else if (subType === 'SFQ') { %>
+                    <label class="primary" for="description<%= qid %>">Description</label>
+                    <div>
+                        <input type="text" name="description" id="description<%= qid %>" class="text-input" />
+                    </div>
+
+                    <label class="primary" for="hash-interval<%= qid %>">Hash Interval</label>
+                    <div class="inline">
+                        <input type="text" name="hash-interval" id="hash-interval<%= qid %>" class="text-input" />
+                    </div>
+                    <div class="inline suffix">
+                        <span data-infotip="Hash interval (seconds)<br />Hash interval (seconds): 0-4294967295>">seconds</span>
+                    </div>
+
+                    <label class="primary" for="queue-limit<%= qid %>">Queue Limit</label>
+                    <div class="inline">
+                        <input type="text" name="queue-limit" id="queue-limit<%= qid %>" class="text-input" />
+                    </div>
+                    <div class="inline suffix">
+                        <span data-infotip="Maximum queue size (packets)<br />Queue size in packets: 1-127">packets</span>
+                    </div>
+\<% } else if (subType === 'PFIFO') { %>
+                    <label class="primary" for="limit<%= qid %>">Limit</label>
+                    <div class="inline">
+                        <input type="text" name="limit" id="limit<%= qid %>" class="text-input" />
+                    </div>
+                    <div class="inline suffix">
+                        <span data-infotip="Hard limit on the real queue size (packets).<br />Queue size in packets: 1-1000000.">packets</span>
+                    </div>
+\<% } else if (subType === 'HFQ') { %>
+                    <label class="primary" for="description<%= qid %>">Description</label>
+                    <div>
+                        <input type="text" name="description" id="description<%= qid %>" class="text-input" />
+                    </div>
+
+                    <label class="primary" for="host-identifier<%= qid %>">Host Identifier</label>
+                    <div>
+                        <select name="host-identifier" id="host-identifier<%= qid %>" data-infotip="Host identifier for host faireness queue<br />Use source IP (default) or destination IP as host identifier.">
+                            <option value="sip">Source IP</option>
+                            <option value="dip">Destination IP</option>
+                        </select>
+                    </div>
+
+                    <label class="primary" for="max-rate<%= qid %>">Max Rate</label>
+                    <div class="inline">
+                        <input type="text" name="max-rate" id="max-rate<%= qid %>" class="text-input" />
+                    </div>
+                    <div class="inline suffix">
+                        <select name="max-rate-unit" data-infotip="Max bandwidth limit per host.">
+                            <option value="bit">bits/sec</option>
+                            <option value="kbit">Kbits/sec</option>
+                            <option value="mbit" selected>Mbits/sec</option>
+                        </select>
+                    </div>
+
+                    <label class="primary" for="subnet<%= qid %>">Subnet</label>
+                    <div>
+                        <input type="text" name="subnet" id="subnet<%= qid %>" class="text-input"
+                            data-infotip="Subnet for host faireness queue (REQUIRED)<br />IPv4 subnet.<br />Example: 192.0.2.0/24" />
+                    </div>
+\<% } %>
+
+                </fieldset>
+            </div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="small save">Save</button>
+            <button type="button" class="small cancel">Cancel</button>
+        </div>
+    </form>
+</script>
+
+<script id="QosAdvancedQueueTypesAddDropDownTemplate" type="text/template">
+  <button type="button">Add Queue Type</button>
+  <ul class="action-list">
+    <li><a class="add-fq-codel">Add FQ_CODEL</a></li>
+    <li><a class="add-hfq">Add HFQ</a></li>
+    <li><a class="add-sfq">Add SFQ</a></li>
+    <li><a class="add-pfifo">Add PFIFO</a></li>
+  </ul>
+</script>
+
+<script id="QosAdvancedQueueTypesDropDownTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config">Config</a></li>
+    <li><a class="action-delete">Delete</a></li>
+  </ul>
+</script>
+
+<script id="QosAdvancedQueueDropDownTemplate" type="text/template">
+  <ul class="action-list">
+    <li><a class="action-config">Config</a></li>
+    <li><a class="action-show-filters">Show Filters</a></li>
+    <li><a class="action-add-root" data-type='root'>Add Root</a></li>
+    <li><a class="action-add-branch" data-type='branch'>Add Branch</a></li>
+    <li><a class="action-add-leaf" data-type='leaf'>Add Leaf</a></li>
+    <li><a class="action-delete">Delete</a></li>
+  </ul>
+</script>
+
+<script id="QosAdvancedQueueRootConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary">Queue ID</label>
+          <div>
+            <span class='qid'><%= qid %></span>
+            <input type="text" name="qid" id="qid" class="text-input" data-infotip="Class Identifier.<br /><1-1023>"/>
+          </div>
+
+          <label class="primary" for="attachto<%= qid %>">Attach to</label>
+          <div>
+            <select name='attach-to' class='has-other' id="attachto<%= qid %>" data-infotip="attach queue to where, global or interface (REQUIRED)"></select>
+          </div>
+
+          <label class="primary" for="description<%= qid %>">Description</label>
+          <div>
+            <input type="text" name="description" id="description<%= qid %>" class="text-input" data-infotip="Description for this traffic class"/>
+          </div>
+
+          <label class="primary" for="bandwidth<%= qid %>">Bandwidth</label>
+          <div class="inline">
+            <input type="text" name="bandwidth" id="bandwidth<%= qid %>" class="text-input"/>
+          </div>
+          <div class="inline suffix">
+            <select name="bandwidth-unit" data-infotip="Bandwidth limit (REQUIRED)">
+              <option value="bit">bits/sec</option>
+              <option value="kbit">Kbits/sec</option>
+              <option value="mbit" selected>Mbits/sec</option>
+            </select>
+          </div>
+          <!--
+                              <label class="primary" for="default<%= qid %>">Default</label>
+                              <div>
+                                  <select name='default' id="default<%= qid %>"></select>
+                              </div>
+          -->
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="QosAdvancedQueueBranchConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary">Queue ID</label>
+          <div>
+            <span class='qid'><%= qid %></span>
+            <input type="text" name="qid" id="qid" class="text-input"
+                   data-infotip="Class Identifier.<br /><1-1023>"/>
+          </div>
+
+          <label class="primary" for="parent<%= qid %>">Parent</label>
+          <div>
+            <span class='parent'><%= parent %></span>
+          </div>
+
+          <label class="primary" for="priority<%= qid %>">Priority</label>
+          <div>
+            <select name='priority' id="priority<%= qid %>"
+                    data-infotip="Priority for usage of excess bandwidth.<br />(0 is highest priority and 7 is lowest)">
+              <option value=''>----</option>
+              \<% _.each(_.range(8), function(num) { %>
+              <option value="<%= num %>"><%= num %></option>
+              \<% }); %>
+            </select>
+          </div>
+
+          <label class="primary" for="description<%= qid %>">Description</label>
+          <div>
+            <input type="text" name="description" id="description<%= qid %>" class="text-input"
+                   data-infotip="Description for this traffic class"/>
+          </div>
+
+          <label class="primary" for="bandwidth<%= qid %>">Bandwidth</label>
+          <div class="inline">
+            <input type="text" name="bandwidth" id="bandwidth<%= qid %>" class="text-input"/>
+          </div>
+          <div class="inline suffix">
+            <select name="bandwidth-unit" data-infotip="Bandwidth limit (REQUIRED)">
+              <option value="bit">bits/sec</option>
+              <option value="kbit">Kbits/sec</option>
+              <option value="mbit" selected>Mbits/sec</option>
+            </select>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="QosAdvancedQueueLeafConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary">Queue ID</label>
+          <div>
+            <span class='qid'><%= qid %></span>
+            <input type="text" name="qid" id="qid" class="text-input" data-infotip="Class Identifier.<br /><1-1023>"/>
+          </div>
+
+          <label class="primary" for="parent<%= qid %>">Parent</label>
+          <div>
+            <span class='parent'><%= parent %></span>
+          </div>
+
+          <label class="primary" for="priority<%= qid %>">Priority</label>
+          <div>
+            <select name='priority' id="priority<%= qid %>" data-infotip="Priority for usage of excess bandwidth.<br />(0 is highest priority and 7 is lowest)">
+              <option value=''>----</option>
+              \<% _.each(_.range(8), function(num) { %>
+              <option value="<%= num %>"><%= num %></option>
+              \<% }); %>
+            </select>
+          </div>
+
+          <label class="primary" for="queue-type<%= qid %>">Queue Type</label>
+          <div>
+            <select name="queue-type" id="queue-type<%= qid %>" data-infotip="Queue type for this class">
+              <option value="">----</option>
+              \<% _.each(queueType, function(q, k) { %>
+              <optgroup label="<%= k %>">
+                \<% _.each(q, function(subQ) { %>
+                <option value="<%= subQ %>"><%= subQ %></option>
+                \<% }); %>
+              </optgroup>
+              \<% }); %>
+            </select>
+          </div>
+
+          <label class="primary" for="description<%= qid %>">Description</label>
+          <div>
+            <input type="text" name="description" id="description<%= qid %>" class="text-input" data-infotip="Description for this traffic class"/>
+          </div>
+
+          <label class="primary" for="bandwidth<%= qid %>">Bandwidth</label>
+          <div class="inline">
+            <input type="text" name="bandwidth" id="bandwidth<%= qid %>" class="text-input"/>
+          </div>
+          <div class="inline suffix">
+            <select name="bandwidth-unit" data-infotip="Bandwidth limit (REQUIRED)">
+              <option value="bit">bits/sec</option>
+              <option value="kbit">Kbits/sec</option>
+              <option value="mbit" selected>Mbits/sec</option>
+            </select>
+          </div>
+
+          <label class="primary" for="ceiling<%= qid %>">Ceiling</label>
+          <div class="inline">
+            <input type="text" name="ceiling" id="ceiling<%= qid %>" class="text-input"/>
+          </div>
+          <div class="inline suffix">
+            <select name="ceiling-unit" data-infotip="Ceiling limit">
+              <option value="bit">bits/sec</option>
+              <option value="kbit">Kbits/sec</option>
+              <option value="mbit" selected>Mbits/sec</option>
+            </select>
+          </div>
+
+          <label class="primary" for="burst-rate<%= qid %>">Burst Rate</label>
+          <div class="inline">
+            <input type="text" name="burst-rate" id="burst-rate<%= qid %>" class="text-input"/>
+          </div>
+          <div class="inline suffix">
+            <select name="burst-rate-unit" data-infotip="Burst rate limit">
+              <option value="bit">bits/sec</option>
+              <option value="kbit">Kbits/sec</option>
+              <option value="mbit" selected>Mbits/sec</option>
+            </select>
+          </div>
+
+          <label class="primary" for="burst-size<%= qid %>">Burst Size</label>
+          <div class="inline">
+            <input type="text" name="burst-size" id="burst-size<%= qid %>" class="text-input"/>
+          </div>
+          <div class="inline suffix">
+            <select name="burst-size-unit" data-infotip="The allowed exceeding size sent with burst rate">
+              <option value="b">Bytes</option>
+              <option value="kb">Kbytes</option>
+              <option value="mb">Mbytes</option>
+              <option value="gb">Gbytes</option>
+            </select>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="QosAdvancedQueueFiltersTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic qos unpadded">
+        <table class="data-table">
+          <thead>
+          <tr>
+            <th>Description</th>
+            <th>Filter ID</th>
+            <th>Target</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>&nbsp;</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="actions grouped">
+      <div class="left">
+        <button type="button" class="small add filter">Add New Filter</button>
+      </div>
+    </div>
+    </form>
+</script>
+
+<script id="QosAdvancedQueueFilterDropDownTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config">Config</a></li>
+    <li><a class="action-delete">Delete</a></li>
+  </ul>
+</script>
+
+<script id="QosAdvancedQueueFilterConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="dialog-tabs">
+      <ul>
+        <li><a href="#basic">Basic</a></li>
+        <li><a href="#match">Match</a></li>
+      </ul>
+    </div>
+
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary">Filter ID</label>
+          <div>
+            <span class='qid'><%= qid %></span>
+            <input type="text" name="qid" id="qid" class="text-input"/>
+          </div>
+
+          <label class="primary">Attach to</label>
+          <div>
+            \<%= attach_to %>
+          </div>
+
+          <label class="primary" for="target" id="target<%= qid %>">Target</label>
+          <div>
+            <select name="target" id="target<%= qid %>"></select>
+          </div>
+
+          <label class="primary" for="description<%= qid %>">Description</label>
+          <div>
+            <input type="text" name="description" id="description<%= qid %>" class="text-input"/>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content match">
+        <fieldset class="primary">
+          <ul>
+            <li>
+              <label class="inline"><input type="radio" name="match" value="ip" class="radio-input" checked/>IP/Ether/Mark/Application</label>
+              <fieldset class="nested unlabeled">
+                <fieldset class="combo">
+                  <legend>IP</legend>
+                  <label class="primary" for="ip-dscp">DSCP</label>
+                  <div>
+                    <input type="text" name="ip-dscp" id="ip-dscp<%= qid %>" class="text-input"
+                           data-infotip="IP DSCP number: <b>0-63</b>"/>
+                  </div>
+
+                  <label class="primary" for="ip-protocol" id="ip-protocol<%= qid %>">Protocol</label>
+                  <div>
+                    <input type="text" name="ip-protocol" id="ip-protocol<%= qid %>" class="text-input"
+                           data-infotip="IP protocol value: <b>0-255</b>"/>
+                  </div>
+
+                  <label class="primary" for="ip-source-address" id="ip-source-address<%= qid %>">Source Address</label>
+                  <div class="float">
+                    <input type="text" name="ip-source-address" id="ip-source-address<%= qid %>" class="text-input"
+                           data-infotip="IP source address for this match.<br />IPv4 address with prefix.<br />Example: <b>192.0.2.0/24</b>"/>
+                  </div>
+
+                  <label class="primary float" for="ip-source-port" id="ip-source-port<%= qid %>">Source Port</label>
+                  <div>
+                    <input type="text" name="ip-source-port" id="ip-source-port<%= qid %>" class="text-input port"
+                           data-infotip="TCP (or UDP) source port for this match.<br />Numeric IP port: <b>1-65535</b><br />Assigned TCP (or UDP) port name"/>
+                  </div>
+
+                  <label class="primary" for="ip-destination-address" id="ip-destination<%= qid %>">Destination
+                    Address</label>
+                  <div class="float">
+                    <input type="text" name="ip-destination-address" id="ip-destination<%= qid %>" class="text-input"
+                           data-infotip="IP destination address for this match.<br />IPv4 address with prefix.<br />Example: <b>192.0.2.0/24</b>"/>
+                  </div>
+
+                  <label class="primary float" for="ip-destination-port">Destination Port</label>
+                  <div class="float">
+                    <input type="text" name="ip-destination-port" id="ip-destination-port<%= qid %>" class="text-input port"
+                           data-infotip="TCP (or UDP) destination port for this match.<br />Numeric IP port: <b>1-65535</b><br />Assigned TCP (or UDP) port name"/>
+                  </div>
+
+                </fieldset>
+                <fieldset class="combo">
+                  <legend>Ether</legend>
+
+                  <label class="primary" for="ether-protocol">Protocol</label>
+                  <div>
+                    <select name="ether-protocol" id="ether-protocol<%= qid %>">
+                      <option value="all">No restriction on protocols</option>
+                      <option value="name">Choose a protocol by name</option>
+                      <option value="number">Enter a protocol number</option>
+                      <option value="text">Enter a protocol name</option>
+                    </select>
+                  </div>
+                  <div class="ether-protocol-name ether-addon">
+                    <select name="ether-protocol-name">
+                      \<% _.each(protocols, function(protocol) { %>
+                      <option value="<%= protocol %>"><%= protocol %></option>
+                      \<% }) %>
+                    </select>
+                  </div>
+
+                  <div class="ether-protocol-number ether-addon">
+                    <input type="text" name="ether-protocol-number" class="text-input"
+                           data-infotip="range: <b>0-65535</b>"
+                           data-type="integer" data-range="0-65535"/>
+                  </div>
+                  <div class="ether-protocol-text ether-addon">
+                    <input type="text" name="ether-protocol-text" class="text-input" data-type="text"/>
+                  </div>
+                  <label class="primary" for="ether-source">Source</label>
+                  <div>
+                    <input type="text" name="ether-source" id="ether-source<%= qid %>" class="text-input"
+                           data-infotip="<h:h:h:h:h:h> Ethernet source address for this match"/>
+                  </div>
+
+                  <label class="primary" for="ether-destination">Destination</label>
+                  <div>
+                    <input type="text" name="ether-destination" id="ether-destination<%= qid %>" class="text-input"
+                           data-infotip="<h:h:h:h:h:h> Ethernet destination address for this match"/>
+                  </div>
+                </fieldset>
+                <fieldset class="combo">
+                  <legend>Mark</legend>
+                  <label class="primary" for="mark">Mark</label>
+                  <div>
+                    <input type="text" name="mark" id="mark<%= qid %>" class="text-input"
+                           data-infotip="Mark matching: <b>0-255</b><br />Mark match with mask: <b>hex_value/hex_mask</b>"/>
+                  </div>
+                </fieldset>
+                <fieldset class="combo">
+                  <legend>Application</legend>
+                  <label class="primary" for="application">Application</label>
+                  <div>
+                    <select name="application" id="application<%= qid %>"></select>
+                  </div>
+                </fieldset>
+              </fieldset>
+            </li>
+            <li>
+              <label class="inline"><input type="radio" name="match" value="interface" class="radio-input"/>Interface</label>
+              <fieldset class="nested unlabeled">
+                <div>
+                  <select name="interface" id="interface<%= qid %>"></select>
+                </div>
+              </fieldset>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+    </form>
+</script>

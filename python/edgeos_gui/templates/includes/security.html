@@ -1,0 +1,1163 @@
+<!-- Start: Security -->
+<div id="Security" class="main-section">
+  <div class="section-tabs">
+    <ul>
+      <li><a href="#Security/Port_Forwarding" data-container="SecurityPortForwarding">Port Forwarding</a></li>
+      <li><a href="#Security/Firewall/Policies" data-container="SecurityFirewallPolicies">Firewall Policies</a></li>
+      <li><a href="#Security/NAT" data-container="SecurityNat">NAT</a></li>
+      <li><a href="#Security/Groups" data-container="SecurityGroups">Firewall/NAT Groups</a></li>
+    </ul>
+  </div>
+  <div class="section-container tall tabbed">
+    <div id="SecurityPortForwarding" class="wide tall ui-layout-pane"></div>
+    <div id="SecurityFirewallPolicies" class="wide tall"></div>
+    <div id="SecurityGroups" class="wide tall"></div>
+    <div id="SecurityNat" class="wide tall"></div>
+  </div>
+</div>
+
+<script id="SecurityFirewallPoliciesTemplate" type="text/template">
+  <div class="section-container table-container">
+    <div id="SecurityFirewallPoliciesAdd" class="add">
+      <button type="button">Add Ruleset</button>
+    </div>
+    <div id="SecurityFirewallPoliciesFilters" class="filters">
+      <ul class="ui-tabs-buttonset">
+        <li class="all"><a href="#Security/Firewall/Policies">All</a></li>
+        <li class="drop"><a href="#Security/Firewall/Policies/filter/drop">Drop</a></li>
+        <li class="reject"><a href="#Security/Firewall/Policies/filter/reject">Reject</a></li>
+        <li class="accept"><a href="#Security/Firewall/Policies/filter/accept">Accept</a></li>
+      </ul>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Interfaces</th>
+          <th>Number of Rules</th>
+          <th>Default Action</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="SecurityFirewallPoliciesRulesetCopyTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content">
+        <fieldset class="primary">
+          <label class="primary required" for="name<%= id %>">Name</label>
+          <div>
+            <input type="text" id="name<%= id %>" name="name" class="text-input" />
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small copy">Copy</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityFirewallPoliciesRulesetCreateTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary required" for="name<%= id %>">Name</label>
+          <div>
+            <input type="text" id="name<%= id %>" name="name" class="text-input" data-infotip="Unique name for this firewall ruleset"/>
+          </div>
+
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary required" data-field="default-action">Default action</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="default-action" value="drop" class="radio-input" checked /> Drop</label></li>
+            <li><label class="inline"><input type="radio" name="default-action" value="reject" class="radio-input" /> Reject</label></li>
+            <li><label class="inline"><input type="radio" name="default-action" value="accept" class="radio-input" /> Accept</label></li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary">
+          <label class="primary" for="enable-default-log<%= id %>">Default Log</label>
+          <div>
+            <input type="checkbox" id="enable-default-log<%= id %>" name="enable-default-log" value="1" class="check-box-input" data-infotip="Log when the default action is taken"/>
+          </div>
+        </fieldset>
+
+        <fieldset class="actions">
+          <button type="submit" class="save">Save</button>
+        </fieldset>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityFirewallPoliciesRulesetConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="dialog-tabs">
+      <ul>
+        <li><a href="#rules" data-button="rules">Rules</a></li>
+        <li><a href="#config" data-button="config">Configuration</a></li>
+        <li><a href="#interfaces" data-button="config">Interfaces</a></li>
+        <li><a href="#stats" data-button="stats" class="realtime">Stats</a></li>
+      </ul>
+    </div>
+
+    <div class="scrollable">
+      <div class="tab-content rules unpadded">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>New</th>
+              <th>Order</th>
+              <th>Description</th>
+              <th>Source</th>
+              <th>Destination</th>
+              <th>Protocol</th>
+              <th>Action</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary" for="name<%= id %>">Name</label>
+          <div class="readonly"><%= name %></div>
+
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary required" data-field="default-action">Default Action</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="default-action" value="drop" class="radio-input" /> Drop</label></li>
+            <li><label class="inline"><input type="radio" name="default-action" value="reject" class="radio-input" /> Reject</label></li>
+            <li><label class="inline"><input type="radio" name="default-action" value="accept" class="radio-input" /> Accept</label></li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary">
+          <label class="primary" for="enable-default-log<%= id %>">Default Log</label>
+          <div>
+            <input type="checkbox" id="enable-default-log<%= id %>" name="enable-default-log" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content interfaces">
+        <fieldset class="primary interfaces">
+          <div class="interface clearfix">
+            <div class="left">
+              <label class="primary required">Interface</label>
+              <select name="interface">
+                <option value="">--</option>
+              </select>
+            </div>
+            <div class="right">
+              <label class="primary required">Direction</label>
+              <select name="direction">
+                <option value="">--</option>
+                <option value="in">in</option>
+                <option value="out">out</option>
+                <option value="local">local</option>
+              </select>
+            </div>
+                        <span class="remove" /></span>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content stats unpadded">
+        <!-- to be replaced with the SecurityFirewallPoliciesRulesetStatsTemplate template -->
+      </div>
+    </div>
+
+    <div class="actions grouped">
+      <div class="left">
+        <button type="button" class="small add rules">Add New Rule</button>
+      </div>
+
+      <div class="right">
+        <button type="button" class="small order rules">Save Rule Order</button>
+        <button type="submit" class="small save config">Save Ruleset</button>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityFirewallPoliciesRulesetStatsTemplate" type="text/template">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Rule</th>
+        <th>Packets</th>
+        <th>Bytes</th>
+        <th>Action</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</script>
+
+<script id="SecurityFirewallPoliciesRuleConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="dialog-tabs">
+      <ul>
+        <li><a href="#basic">Basic</a></li>
+        <li><a href="#advanced">Advanced</a></li>
+        <li><a href="#source">Source</a></li>
+        <li><a href="#destination">Destination</a></li>
+        <li><a href="#time">Time</a></li>
+      </ul>
+    </div>
+
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input" />
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" checked="checked" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary required" data-field="action">Action</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="action" value="drop" class="radio-input" /> Drop</label></li>
+            <li><label class="inline"><input type="radio" name="action" value="reject" class="radio-input" /> Reject</label></li>
+            <li><label class="inline"><input type="radio" name="action" value="reject-tcp" class="radio-input" /> Reject TCP</label></li>
+            <li><label class="inline"><input type="radio" name="action" value="accept" class="radio-input" /> Accept</label></li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="protocol">Protocol</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="protocol" value="all" class="radio-input" /> All protocols</label></li>
+            <li class="inline"><label class="inline"><input type="radio" name="protocol" value="tcp" class="radio-input" /> TCP</label></li>
+            <li class="inline"><label class="inline"><input type="radio" name="protocol" value="udp" class="radio-input" /> UDP</label></li>
+            <li><label class="inline"><input type="radio" name="protocol" value="tcp_udp" class="radio-input" /> Both TCP and UDP</label></li>
+            <li>
+              <label class="inline"><input type="radio" name="protocol" value="name" class="radio-input" /> Choose a protocol by name</label>
+
+              <fieldset class="nested unlabeled">
+                <select name="protocol-name">
+                  %for proto in ['ah', 'ax.25', 'dccp', 'ddp', 'egp', 'eigrp', 'encap', 'esp', 'etherip', 'fc', 'ggp', 'gre', 'hip', 'hmp', 'icmp', 'icmpv6', 'idpr-cmtp', 'idrp', 'igmp', 'igp', 'ip', 'ipcomp', 'ipencap', 'ipip', 'ipv6', 'ipv6-frag', 'ipv6-icmp', 'ipv6-nonxt', 'ipv6-opts', 'ipv6-route', 'isis', 'iso-tp4', 'l2tp', 'manet', 'mpls-in-ip', 'ospf', 'pim', 'pup', 'rdp', 'rohc', 'rspf', 'rsvp', 'sctp', 'shim6', 'skip', 'st', 'udplite', 'vmtp', 'vrrp', 'wesp', 'xns-idp', 'xtp']:
+                  <option value="{{ proto }}">{{ proto }}</option>
+                  %end
+                </select>
+
+                <label class="inline"><input type="checkbox" name="protocol-name-negation" value="1" class="check-box-input" /> Match all protocols except for this</label>
+              </fieldset>
+            </li>
+            <li>
+              <label class="inline"><input type="radio" name="protocol" value="number" class="radio-input" /> Enter a protocol number</label>
+
+              <fieldset class="nested unlabeled">
+                <input type="text" name="protocol-number" class="text-input"/>
+
+                <label class="inline"><input type="checkbox" name="protocol-number-negation" value="1" class="check-box-input" /> Match all protocols except for this</label>
+              </fieldset>
+            </li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary">
+          <label class="primary" for="log<%= id %>">Logging</label>
+          <div>
+            <input type="checkbox" id="log<%= id %>" name="log" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content advanced">
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="state">State</legend>
+
+          <ul>
+            <li><label class="inline"><input type="checkbox" name="state-established" value="1" class="check-box-input" /> Established</label></li>
+            <li><label class="inline"><input type="checkbox" name="state-invalid" value="1" class="check-box-input" /> Invalid</label></li>
+            <li><label class="inline"><input type="checkbox" name="state-new" value="1" class="check-box-input" /> New</label></li>
+            <li><label class="inline"><input type="checkbox" name="state-related" value="1" class="check-box-input" /> Related</label></li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="recent-time<%= id %>">Recent Time</label>
+          <div>
+            <input type="text" id="recent-time<%= id %>" name="recent-time" class="text-input" data-infotip="Source addresses seen in the last N seconds"/>
+          </div>
+
+          <label class="primary" for="recent-count<%= id %>">Recent Count</label>
+          <div>
+            <input type="text" id="recent-count<%= id %>" name="recent-count" class="text-input" data-infotip="Source addresses seen more than N times"/>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="ipsec">IPsec</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="ipsec" value="" class="radio-input" /> Don't match on IPsec packets</label></li>
+            <li><label class="inline"><input type="radio" name="ipsec" value="match-ipsec" class="radio-input" /> Match inbound IPsec packets</label></li>
+            <li><label class="inline"><input type="radio" name="ipsec" value="match-none" class="radio-input" /> Match inbound non-IPsec packets</label></li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="p2p">P2P</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="p2p" value="" class="radio-input" /> None</label></li>
+            <li><label class="inline"><input type="radio" name="p2p" value="all" class="radio-input" /> All</label></li>
+            <li>
+              <label class="inline"><input type="radio" name="p2p" value="name" class="radio-input" /> Choose P2P app(s) by name</label>
+
+              <fieldset class="nested unlabeled p2p">
+                <ul class="left">
+                  <li><label class="inline"><input type="checkbox" name="p2p-name" value="applejuice" class="check-box-input" /> AppleJuice</label></li>
+                  <li><label class="inline"><input type="checkbox" name="p2p-name" value="bittorrent" class="check-box-input" /> BitTorrent</label></li>
+                  <li><label class="inline"><input type="checkbox" name="p2p-name" value="directconnect" class="check-box-input" /> Direct Connect</label></li>
+                </ul>
+                <ul class="left">
+                  <li><label class="inline"><input type="checkbox" name="p2p-name" value="edonkey" class="check-box-input" /> eDonkey</label></li>
+                  <li><label class="inline"><input type="checkbox" name="p2p-name" value="gnutella" class="check-box-input" /> Gnutella</label></li>
+                  <li><label class="inline"><input type="checkbox" name="p2p-name" value="kazaa" class="check-box-input" /> KaZaA</label></li>
+                </ul>
+              </fieldset>
+            </li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="application">Application</legend>
+          <div>
+          <select name='application' id="application<%= id %>">
+            <option value="">--</option>
+            <optgroup label="custom category">
+              \<% _.each(custom_cats, function(cat) { %>
+                  <option value=<%= 'custom-' + cat %>  ><%= cat %></option>
+              \<% }); %>
+            </optgroup>
+            <optgroup label="category">
+              \<% _.each(cats, function(cat) { %>
+                  <option value=<%= 'predefined-' + cat %>  ><%= cat %></option>
+              \<% }); %>
+            </optgroup>
+          </select>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content source">
+        <fieldset class="primary">
+          <label class="primary" for="source-address<%= id %>">Address</label>
+          <div>
+            <input type="text" id="source-address<%= id %>" name="source-address" class="text-input" data-infotip="Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+          </div>
+
+          <label class="primary" for="source-port<%= id %>">Port</label>
+          <div>
+            <input type="text" id="source-port<%= id %>" name="source-port" class="text-input" data-infotip="Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            <span class="tooltip">ex. 1-100,200,201</span>
+          </div>
+
+          <label class="primary" for="source-mac-address<%= id %>">MAC Address</label>
+          <div>
+            <input type="text" id="source-mac-address<%= id %>" name="source-mac-address" class="text-input" data-infotip="Example:</br></br><b>00:01:02:03:04:05</b>"/>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+            <div class="grouped">
+              <label class="primary" for="source-address-group<%= id %>">Address Group</label>
+              <div>
+                <select name="source-address-group" id="source-address-group<%= id %>"></select>
+              </div>
+
+              <div class="secondary">
+                  <label class="primary" for="source-iface-address<%= id %>">or Interface Addr</label>
+                  <div>
+                      <select name="source-iface-address" id="source-iface-address<%= id %>"></select>
+                      <input type="text" name="source-iface-address-custom" value="" />
+                  </div>
+
+                  <br />
+
+                  <label class="primary" for="source-iface-network<%= id %>">or Interface Network</label>
+                  <div>
+                      <select name="source-iface-network" id="source-iface-network<%= id %>"></select>
+                      <input type="text" name="source-iface-network-custom" value="" />
+                  </div>
+              </div>
+            </div>
+
+          <label class="primary" for="source-network-group<%= id %>">Network Group</label>
+          <div>
+            <select name="source-network-group" id="source-network-group<%= id %>"></select>
+          </div>
+
+          <label class="primary" for="source-port-group<%= id %>">Port Group</label>
+          <div>
+            <select name="source-port-group" id="source-port-group<%= id %>"></select>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content destination">
+        <fieldset class="primary">
+          <label class="primary" for="destination-address<%= id %>">Address</label>
+          <div>
+            <input type="text" id="destination-address<%= id %>" name="destination-address" class="text-input" data-infotip="Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>" />
+          </div>
+
+          <label class="primary" for="destination-port<%= id %>">Port</label>
+          <div>
+            <input type="text" id="destination-port<%= id %>" name="destination-port" class="text-input" data-infotip="Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            <span class="tooltip">ex. 1-100,200,201</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+            <div class="grouped">
+              <label class="primary" for="destination-address-group<%= id %>">Address Group</label>
+              <div>
+                <select name="destination-address-group" id="destination-address-group<%= id %>"></select>
+              </div>
+
+              <span class="label">or</span>
+
+              <label class="primary" for="destination-iface-address<%= id %>">Interface Addr</label>
+              <div>
+                <select name="destination-iface-address" id="destination-iface-address<%= id %>"></select>
+                <input type="text" name="destination-iface-address-custom" value="" />
+              </div>
+
+                        <span class="label">or</span>
+                        <br />
+
+                        <label class="primary" for="destination-iface-network<%= id %>">Interface Network</label>
+                        <div>
+                            <select name="destination-iface-network" id="destination-iface-network<%= id %>"></select>
+                            <input type="text" name="destination-iface-network-custom" value="" />
+                        </div>
+            </div>
+
+          <label class="primary" for="destination-network-group<%= id %>">Network Group</label>
+          <div>
+            <select name="destination-network-group" id="destination-network-group<%= id %>"></select>
+          </div>
+
+          <label class="primary" for="destination-port-group<%= id %>">Port Group</label>
+          <div>
+            <select name="destination-port-group" id="destination-port-group<%= id %>"></select>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content time">
+        <fieldset class="primary">
+          <label class="primary" for="monthdays<%= id %>">Month Days</label>
+          <div>
+            <input type="text" id="monthdays<%= id %>" name="monthdays" class="text-input" data-infotip="Days of the month</br></br>Example: <b>1,15,22</b>"/>
+            <span class="tooltip">ex. 1,2,3</span>
+          </div>
+
+          <div class="unlabeled">
+            <label class="inline"><input type="checkbox" name="monthdays-negation" value="1" class="check-box-input" /> Match all month days except for these</label>
+          </div>
+
+          <label class="primary" for="weekdays<%= id %>">Week Days</label>
+          <div>
+            <input type="text" id="weekdays<%= id %>" name="weekdays" class="text-input" data-infotip="Days of the week</br></br>Example: <b>Tue,Sat,Sun</b>"/>
+            <span class="tooltip">ex. Mon,Tue,Wed</span>
+          </div>
+
+          <div class="unlabeled">
+            <label class="inline"><input type="checkbox" name="weekdays-negation" value="1" class="check-box-input" /> Match all week days except for these</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="startdate<%= id %>">Start Date</label>
+          <div>
+            <input type="text" id="startdate<%= id %>" name="startdate" class="text-input" data-infotip="Date in yyyy-mm-dd format</br></br>Example: <b>2012-09-17</b>" />
+            <span class="tooltip">ex. 2011-01-31T13:30:00</span>
+          </div>
+
+          <label class="primary" for="starttime<%= id %>">Start Time</label>
+          <div>
+            <input type="text" id="starttime<%= id %>" name="starttime" class="text-input"  data-infotip="Time in 24 hour notation</br></br>Example: <b>09:00:00</b>"/>
+            <span class="tooltip">ex. 20:30:00</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="stopdate<%= id %>">Stop Date</label>
+          <div>
+            <input type="text" id="stopdate<%= id %>" name="stopdate" class="text-input" data-infotip="Date in yyyy-mm-dd format</br></br>Example: <b>2012-09-17</b>" />
+            <span class="tooltip">ex. 2011-01-31T13:30:00</span>
+          </div>
+
+          <label class="primary" for="stoptime<%= id %>">Stop Time</label>
+          <div>
+            <input type="text" id="stoptime<%= id %>" name="stoptime" class="text-input" data-infotip="Time in 24 hour notation</br></br>Example: <b>09:00:00</b>"/>
+            <span class="tooltip">ex. 20:30:00</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer utc">
+          <label class="indented inline"><input type="checkbox" name="utc" value="all" class="check-box-input" /> Interpret dates and times as UTC</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityGroupsTemplate" type="text/template">
+  <div class="section-container table-container">
+    <div id="SecurityGroupsAdd" class="add">
+      <button type="button">Add Group</button>
+    </div>
+    <div id="SecurityGroupsFilters" class="filters">
+      <ul class="ui-tabs-buttonset">
+        <li class="all"><a href="#Security/Groups">All</a></li>
+        <li class="address"><a href="#Security/Groups/filter/address">Address</a></li>
+        <li class="network"><a href="#Security/Groups/filter/network">Network</a></li>
+        <li class="port"><a href="#Security/Groups/filter/port">Port</a></li>
+      </ul>
+    </div>
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th>Number of group members</th>
+        <th>&nbsp;</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="SecurityGroupsCreateTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="name<%= id %>">Name</label>
+            <div>
+              <input type="text" id="name<%= id %>" name="name" class="text-input" data-infotip="Unique name for this group"/>
+            </div>
+
+            <label class="primary" for="description<%= id %>">Description</label>
+            <div>
+              <input type="text" id="description<%= id %>" name="description" class="text-input" />
+            </div>
+          </fieldset>
+
+          <fieldset class="primary">
+            <legend class="primary required" data-field="type">Group Type</legend>
+
+            <ul>
+              <li><label class="inline"><input type="radio" name="type" value="address-group" class="radio-input" /> Address Group</label></li>
+              <li><label class="inline"><input type="radio" name="type" value="network-group" class="radio-input" /> Network Group</label></li>
+              <li><label class="inline"><input type="radio" name="type" value="port-group" class="radio-input" /> Port Group</label></li>
+            </ul>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityGroupsConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <input type="hidden" name="memberkey" value="<%= memberkey %>" />
+
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary">Name</label>
+            <div><%= name %></div>
+
+            <label class="primary" for="description<%= id %>">Description</label>
+            <div>
+              <input type="text" id="description<%= id %>" name="description" class="text-input" />
+            </div>
+          </fieldset>
+
+          <fieldset class="primary members">
+            <legend class="primary required" data-field="members"><%= grouptype %></legend>
+
+            <ul>
+              <li><input type="text" class="group-member text-input" data-infotip="<%= infotip %>"/></li>
+            </ul>
+          </fieldset>
+
+          <fieldset class="actions flush">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityGroupInfotipAddress" type="text/template">
+IPv4 Address or range or network</br></br>Example: <b>192.0.2.1</b>, <b>192.0.2.1-192.0.2.15</b>, <b>192.0.2.0/24</b>
+</script>
+
+<script id="SecurityGroupInfotipNetwork" type="text/template">
+IPv4 Network</br></br>Example: <b>192.0.2.0/24</b>
+</script>
+
+<script id="SecurityGroupInfotipPort" type="text/template">
+UDP or TCP port name, number, or range</br></br>Example: <b>ftp</b>, <b>15</b>, <b>1-1024</b>
+</script>
+
+<script id="SecurityNatTemplate" type="text/template">
+  <div id="SecurityNatSource" class="ui-layout-center"></div>
+  <div id="SecurityNatDestination" class="ui-layout-south"></div>
+</script>
+
+<script id="SecurityNatSourceTemplate" type="text/template">
+  <div class="section-container table-container">
+    <div id="SecurityNatSourceAdd" class="add">
+      <button type="button" name="r_add">Add Source NAT Rule</button>
+      <button type="button" name="r_ord">Save Rule Order</button>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Description</th>
+          <th>Source</th>
+          <th>Destination</th>
+          <th>Translation</th>
+          <th>Count</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="SecurityNatSourceConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input" />
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary required" for="outbound-interface<%= id %>">Outbound Interface</label>
+          <div class="interface-select-wrapper">
+            <select id="outbound-interface<%= id %>" name="outbound-interface">
+              <option value="">--</option>
+            </select>
+                        <input type="text" id="other-interface<%= id %>" name="other-interface" class="text-input"/>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary translations">
+          <legend class="primary required" data-field="translation">Translation</legend>
+
+          <ul>
+            <li class="radio"><label class="inline" data-field="translation masquerade"><input type="radio" name="translation" value="masquerade" class="radio-input"  data-infotip="Use primary address of outbound interface"/> Use Masquerade</label></li>
+            <li class="radio">
+              <label class="inline"><input type="radio" name="translation" value="manual" class="radio-input" /> Specify address and/or port</label>
+
+              <fieldset class="nested unlabeled">
+                <ul>
+                  <li class="textbox">
+                    <label class="inline">Address</label>
+                    <input type="text" name="translation-address" class="text-input" data-infotip="Address translation</br></br>Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+                  </li>
+                  <li class="textbox">
+                    <label class="inline">Port</label>
+                    <input type="text" name="translation-port" class="text-input" class="text-input" data-infotip="Port translation</br></br>Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+                  </li>
+                </ul>
+              </fieldset>
+            </li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="exclude<%= id %>">Exclude from NAT</label>
+          <div>
+            <input type="checkbox" id="exclude<%= id %>" name="exclude" value="1" class="check-box-input" />
+          </div>
+
+          <label class="primary" for="log<%= id %>">Enable Logging</label>
+          <div>
+            <input type="checkbox" id="log<%= id %>" name="log" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="protocol">Protocol</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="protocol" value="all" class="radio-input" /> All protocols</label></li>
+                                                <li class="inline"><label class="inline"><input type="radio" name="protocol" value="tcp" class="radio-input" /> TCP</label></li>
+                                                <li class="inline"><label class="inline"><input type="radio" name="protocol" value="udp" class="radio-input" /> UDP</label></li>
+            <li><label class="inline"><input type="radio" name="protocol" value="tcp_udp" class="radio-input" /> Both TCP and UDP</label></li>
+            <li>
+              <label class="inline"><input type="radio" name="protocol" value="name" class="radio-input" /> Choose a protocol by name</label>
+
+              <fieldset class="nested unlabeled">
+                <select name="protocol-name">
+                  %for proto in ['ah', 'ax.25', 'dccp', 'ddp', 'egp', 'eigrp', 'encap', 'esp', 'etherip', 'fc', 'ggp', 'gre', 'hip', 'hmp', 'icmp', 'icmpv6', 'idpr-cmtp', 'idrp', 'igmp', 'igp', 'ip', 'ipcomp', 'ipencap', 'ipip', 'ipv6', 'ipv6-frag', 'ipv6-icmp', 'ipv6-nonxt', 'ipv6-opts', 'ipv6-route', 'isis', 'iso-tp4', 'l2tp', 'manet', 'mpls-in-ip', 'ospf', 'pim', 'pup', 'rdp', 'rohc', 'rspf', 'rsvp', 'sctp', 'shim6', 'skip', 'st', 'udplite', 'vmtp', 'vrrp', 'wesp', 'xns-idp', 'xtp']:
+                  <option value="{{ proto }}">{{ proto }}</option>
+                  %end
+                </select>
+
+                <label class="inline"><input type="checkbox" name="protocol-name-negation" value="1" class="check-box-input" /> Match all protocols except for this</label>
+              </fieldset>
+            </li>
+            <li>
+              <label class="inline"><input type="radio" name="protocol" value="number" class="radio-input" /> Enter a protocol number</label>
+
+              <fieldset class="nested unlabeled">
+                <input type="text" name="protocol-number" class="text-input" data-type="integer" data-range="0-255" />
+
+                <label class="inline"><input type="checkbox" name="protocol-number-negation" value="1" class="check-box-input" /> Match all protocols except for this</label>
+              </fieldset>
+            </li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="source-address<%= id %>">Src Address</label>
+          <div>
+              <input type="text" id="source-address<%= id %>" name="source-address" class="text-input" data-infotip="Address to be translated</br></br>Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+            </div>
+
+          <label class="primary" for="source-port<%= id %>">Src Port</label>
+          <div>
+              <input type="text" id="source-port<%= id %>" name="source-port" class="text-input" data-infotip="Port to be translated</br></br>Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            <span class="tooltip">ex. 1-100,200,201</span>
+            </div>
+
+            <div class="grouped">
+              <label class="primary" for="nat-source-address-group<%= id %>">Src Address Group</label>
+              <div>
+                <select name="source-address-group" id="nat-source-address-group<%= id %>"></select>
+              </div>
+
+              <span class="label">or</span>
+
+              <label class="primary" for="nat-source-iface-address<%= id %>">Interface Addr</label>
+              <div>
+                <select name="source-iface-address" id="nat-source-iface-address<%= id %>"></select>
+                <input type="text" name="source-iface-address-custom" value=""/>
+              </div>
+<!--
+              <span class="label">or</span>
+              <br />
+
+              <label class="primary" for="nat-source-iface-network<%= id %>">Interface Network</label>
+              <div>
+                  <select name="source-iface-network" id="nat-source-iface-network<%= id %>"></select>
+                  <input type="text" name="source-iface-network-custom" value="" />
+              </div>
+-->
+            </div>
+
+          <label class="primary" for="nat-source-network-group<%= id %>">Src Network Group</label>
+          <div>
+            <select name="source-network-group" id="nat-source-network-group<%= id %>"></select>
+          </div>
+
+          <label class="primary" for="nat-source-port-group<%= id %>">Src Port Group</label>
+          <div>
+            <select name="source-port-group" id="nat-source-port-group<%= id %>"></select>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="destination-address<%= id %>">Dest Address</label>
+          <div>
+            <input type="text" id="destination-address<%= id %>" name="destination-address" class="text-input" data-infotip="Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+          </div>
+
+          <label class="primary" for="destination-port<%= id %>">Dest Port</label>
+          <div>
+            <input type="text" id="destination-port<%= id %>" name="destination-port" class="text-input"
+                   data-infotip="Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            <span class="tooltip">ex. 1-100,200,201</span>
+          </div>
+
+          <div class="grouped">
+            <label class="primary" for="nat-destination-address-group<%= id %>">Dest Address Group</label>
+            <div>
+              <select name="destination-address-group" id="nat-destination-address-group<%= id %>"></select>
+            </div>
+
+            <span class="label">or</span>
+
+            <label class="primary" for="nat-destination-iface-address<%= id %>">Interface Addr</label>
+            <div>
+              <select name="destination-iface-address" id="nat-destination-iface-address<%= id %>"></select>
+              <input type="text" name="destination-iface-address-custom" value=""/>
+            </div>
+<!--
+              <span class="label">or</span>
+              <br />
+
+              <label class="primary" for="nat-destination-iface-network<%= id %>">Interface Network</label>
+              <div>
+                  <select name="destination-iface-network" id="nat-destination-iface-network<%= id %>"></select>
+                  <input type="text" name="destination-iface-network-custom" value="" />
+              </div>
+-->
+          </div>
+
+          <label class="primary" for="nat-destination-network-group<%= id %>">Dest Network Group</label>
+          <div>
+            <select name="destination-network-group" id="nat-destination-network-group<%= id %>"></select>
+          </div>
+
+          <label class="primary" for="nat-destination-port-group<%= id %>">Dest Port Group</label>
+          <div>
+            <select name="destination-port-group" id="nat-destination-port-group<%= id %>"></select>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityNatDestinationTemplate" type="text/template">
+  <div class="section-container table-container">
+    <div id="SecurityNatDestinationAdd" class="add">
+      <button type="button"
+       name="r_add">Add Destination NAT Rule</button>
+      <button type="button" name="r_ord">Save Rule Order</button>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Description</th>
+          <th>Source</th>
+          <th>Destination</th>
+          <th>Translation</th>
+          <th>Count</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="SecurityNatDestinationConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input" />
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary required" for="inbound-interface<%= id %>">Inbound Interface</label>
+          <div>
+            <div class="interface-select-wrapper">
+              <select id="inbound-interface<%= id %>" name="inbound-interface">
+                <option value="">--</option>
+              </select>
+                            <input type="text" id="other-interface<%= id %>" name="other-interface" class="text-input"/>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary translations spacer">
+          <legend class="primary required" data-field="translation">Translations</legend>
+
+          <ul>
+            <li class="textbox">
+              <label class="inline" for="translation-address<%= id %>">Address</label>
+              <input type="text" id="translation-address<%= id %>" name="translation-address" class="text-input" data-infotip="Address translation</br></br>Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+            </li>
+            <li class="textbox">
+              <label class="inline" for="translation-port<%= id %>">Port</label>
+              <input type="text" id="translation-port<%= id %>" name="translation-port" class="text-input" data-infotip="Port translation</br></br>Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            </li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="exclude<%= id %>">Exclude from NAT</label>
+          <div>
+            <input type="checkbox" id="exclude<%= id %>" name="exclude" value="1" class="check-box-input" />
+          </div>
+
+          <label class="primary" for="log<%= id %>">Enable Logging</label>
+          <div>
+            <input type="checkbox" id="log<%= id %>" name="log" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <legend class="primary" data-field="protocol">Protocol</legend>
+
+          <ul>
+            <li><label class="inline"><input type="radio" name="protocol" value="all" class="radio-input" /> All protocols</label></li>
+                                                <li class="inline"><label class="inline"><input type="radio" name="protocol" value="tcp" class="radio-input" /> TCP</label></li>
+                                                <li class="inline"><label class="inline"><input type="radio" name="protocol" value="udp" class="radio-input" /> UDP</label></li>
+            <li><label class="inline"><input type="radio" name="protocol" value="tcp_udp" class="radio-input" /> Both TCP and UDP</label></li>
+            <li>
+              <label class="inline"><input type="radio" name="protocol" value="name" class="radio-input" /> Choose a protocol by name</label>
+
+              <fieldset class="nested unlabeled">
+                <select name="protocol-name">
+                  %for proto in  ['ah', 'ax.25', 'dccp', 'ddp', 'egp', 'eigrp', 'encap', 'esp', 'etherip', 'fc', 'ggp', 'gre', 'hip', 'hmp', 'icmp', 'icmpv6', 'idpr-cmtp', 'idrp', 'igmp', 'igp', 'ip', 'ipcomp', 'ipencap', 'ipip', 'ipv6', 'ipv6-frag', 'ipv6-icmp', 'ipv6-nonxt', 'ipv6-opts', 'ipv6-route', 'isis', 'iso-tp4', 'l2tp', 'manet', 'mpls-in-ip', 'ospf', 'pim', 'pup', 'rdp', 'rohc', 'rspf', 'rsvp', 'sctp', 'shim6', 'skip', 'st', 'udplite', 'vmtp', 'vrrp', 'wesp', 'xns-idp', 'xtp']:
+                  <option value="{{ proto }}">{{ proto }}</option>
+                  %end
+                </select>
+
+                <label class="inline"><input type="checkbox" name="protocol-name-negation" value="1" class="check-box-input" /> Match all protocols except for this</label>
+              </fieldset>
+            </li>
+            <li>
+              <label class="inline"><input type="radio" name="protocol" value="number" class="radio-input" /> Enter a protocol number</label>
+
+              <fieldset class="nested unlabeled">
+                <input type="text" name="protocol-number" class="text-input" data-type="integer" data-range="0-255" />
+
+                <label class="inline"><input type="checkbox" name="protocol-number-negation" value="1" class="check-box-input" /> Match all protocols except for this</label>
+              </fieldset>
+            </li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="source-address<%= id %>">Src Address</label>
+          <div>
+              <input type="text" id="source-address<%= id %>" name="source-address" class="text-input" data-infotip="Address to be translated</br></br>Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+            </div>
+
+          <label class="primary" for="source-port<%= id %>">Src Port</label>
+          <div>
+              <input type="text" id="source-port<%= id %>" name="source-port" class="text-input" data-infotip="Port to be translated</br></br>Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            <span class="tooltip">ex. 1-100,200,201</span>
+            </div>
+
+            <div class="grouped">
+                <label class="primary" for="nat-source-address-group<%= id %>">Src Address Group</label>
+                        <div>
+                            <select name="source-address-group" id="nat-source-address-group<%= id %>"></select>
+                        </div>
+
+                        <span class="label">or</span>
+
+              <label class="primary" for="nat-source-iface-address<%= id %>">Interface Addr</label>
+              <div>
+                <select name="source-iface-address" id="nat-source-iface-address<%= id %>"></select>
+                <input type="text" name="source-iface-address-custom" value="" />
+              </div>
+<!--
+                        <span class="label">or</span>
+                        <br />
+
+                        <label class="primary" for="nat-source-iface-network<%= id %>">Interface Network</label>
+                        <div>
+                            <select name="source-iface-network" id="nat-source-iface-network<%= id %>"></select>
+                            <input type="text" name="source-iface-network-custom" value="" />
+                        </div>
+-->
+            </div>
+
+                    <label class="primary" for="nat-source-network-group<%= id %>">Src Network Group</label>
+                    <div>
+                        <select name="source-network-group" id="nat-source-network-group<%= id %>"></select>
+                    </div>
+
+                    <label class="primary" for="nat-source-port-group<%= id %>">Src Port Group</label>
+                    <div>
+                        <select name="source-port-group" id="nat-source-port-group<%= id %>"></select>
+                    </div>
+        </fieldset>
+
+        <fieldset class="primary spacer">
+          <label class="primary" for="destination-address<%= id %>">Dest Address</label>
+          <div>
+              <input type="text" id="destination-address<%= id %>" name="destination-address" class="text-input" data-infotip="Example:</br></br>IPv4 address <b>192.0.2.1</b></br>IPv4 network <b>192.0.2.0/24</b></br>IPv4 range <b>192.0.2.1-192.0.2.255</b>"/>
+          </div>
+
+          <label class="primary" for="destination-port<%= id %>">Dest Port</label>
+          <div>
+            <input type="text" id="destination-port<%= id %>" name="destination-port" class="text-input"
+                   data-infotip="Example:</br></br>port name <b>ftp</b></br>port number</br>port range <b>15-22</b>"/>
+            <span class="tooltip">ex. 1-100,200,201</span>
+          </div>
+
+          <div class="grouped">
+            <label class="primary" for="nat-destination-address-group<%= id %>">Dest Address Group</label>
+            <div>
+              <select name="destination-address-group" id="nat-destination-address-group<%= id %>"></select>
+            </div>
+
+            <span class="label">or</span>
+
+            <label class="primary" for="nat-destination-iface-address<%= id %>">Interface Addr</label>
+            <div>
+              <select name="destination-iface-address" id="nat-destination-iface-address<%= id %>"></select>
+              <input type="text" name="destination-iface-address-custom" value=""/>
+            </div>
+<!--
+                        <span class="label">or</span>
+                        <br />
+
+                        <label class="primary" for="nat-destination-iface-network<%= id %>">Interface Network</label>
+                        <div>
+                            <select name="destination-iface-network" id="nat-destination-iface-network<%= id %>"></select>
+                            <input type="text" name="destination-iface-network-custom" value="" />
+                        </div>
+-->
+            </div>
+
+          <label class="primary" for="nat-destination-network-group<%= id %>">Dest Network Group</label>
+          <div>
+            <select name="destination-network-group" id="nat-destination-network-group<%= id %>"></select>
+          </div>
+
+          <label class="primary" for="nat-destination-port-group<%= id %>">Dest Port Group</label>
+          <div>
+            <select name="destination-port-group" id="nat-destination-port-group<%= id %>"></select>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="SecurityFirewallPoliciesRulesetRowDropDownButton" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-rules" href="#">Edit Ruleset</a></li>
+    <li><a class="action-rules-readonly" href="#">View Rules</a></li>
+    <li><a class="action-configuration" href="#">Configuration</a></li>
+    <li><a class="action-configuration-readonly" href="#">Configuration</a></li>
+    <li><a class="action-interfaces" href="#">Interfaces</a></li>
+    <li><a class="action-interfaces-readonly" href="#">Interfaces</a></li>
+    <li><a class="action-stats" href="#">Stats</a></li>
+    <li><a class="action-stats-readonly" href="#">Stats</a></li>
+    <li><a class="action-copy" href="#">Copy Ruleset</a></li>
+    <li><a class="action-delete" href="#">Delete Ruleset</a></li>
+  </ul>
+</script>
+
+<script id="SecurityFirewallPoliciesRuleRowDropDownButton" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-basic" href="#">Basic</a></li>
+    <li><a class="action-basic-readonly" href="#">Basic</a></li>
+    <li><a class="action-advanced" href="#">Advanced</a></li>
+    <li><a class="action-advanced-readonly" href="#">Advanced</a></li>
+    <li><a class="action-source" href="#">Source</a></li>
+    <li><a class="action-source-readonly" href="#">Source</a></li>
+    <li><a class="action-destination" href="#">Destination</a></li>
+    <li><a class="action-destination-readonly" href="#">Destination</a></li>
+    <li><a class="action-time" href="#">Time</a></li>
+    <li><a class="action-time-readonly" href="#">Time</a></li>
+    <li><a class="action-copy" href="#">Copy Rule</a></li>
+    <li><a class="action-delete" href="#">Delete Rule</a></li>
+  </ul>
+</script>
+
+<script id="SecurityGroupsGroupRowDropDownButton" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<script id="SecurityNatRowDropDownButton" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-copy" href="#">Copy</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<script id="SecurityPortForwardingDefaultTemplate" type="text/template">
+  <div class="section-container service-form">
+    <form method="post" class="ui-form"></form>
+  </div>
+</script>
+<!-- End: Security -->

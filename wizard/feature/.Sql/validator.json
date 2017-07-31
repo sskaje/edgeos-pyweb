@@ -1,0 +1,73 @@
+{
+    "rules": {
+        "interfaces": {
+            "interfaceName": 1,
+            "required": true
+        },
+        "protocol": {
+            "required": true
+        },
+        "burst-up": {
+            "number": true,
+            "rangeWithUnit": ["1500", "10m", "bytes", 1]
+        },
+        "burst-down": {
+            "number": true,
+            "rangeWithUnit": ["1500", "10m", "bytes", 1]
+        },
+        "flows-up": {
+            "digits": true,
+            "range": [1, 65535]
+        },
+        "flows-down": {
+            "digits": true,
+            "range": [1, 65535]
+        },
+        "limit-up": {
+            "digits": true,
+            "range": [0, 1000000]
+        },
+        "limit-down": {
+            "digits": true,
+            "range": [0, 1000000]
+        },
+        "target-up": {
+            "number": true,
+             "rangeWithUnit": ["10u", "10", "s", -1]
+        },
+        "target-down": {
+            "number": true,
+            "rangeWithUnit": ["10u", "10", "s", -1]
+        },
+        "fq-up": {
+            "digits": true,
+            "range": [256, 65535]
+        },
+        "fq-down": {
+            "digits": true,
+            "range": [256, 65535]
+        },
+        "htb-up": {
+            "digits": true,
+            "range": [1, 65535]
+        },
+        "htb-down": {
+            "digits": true,
+            "range": [1, 65535]
+        },
+        "rate-up": {
+            "required": true
+        },
+        "rate-down": {
+            "required": true
+        },
+        "interval-up": {
+            "number": true,
+            "rangeWithUnit": ["1m", "20", "s", -1]
+        },
+        "interval-down": {
+            "number": true,
+            "rangeWithUnit": ["1m", "20", "s", -1]
+        }
+    }
+}

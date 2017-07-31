@@ -1,0 +1,145 @@
+<!doctype html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="copyright" content="Copyright 2012 Ubiquiti Networks, Inc. All rights reserved.">
+
+  <title>{{ title if defined('title') else 'EdgeOS' }}</title>
+
+    <link rel="shortcut icon" href="/media/global/favicon.png" />
+    %if compressed:
+        <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/reset.min.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/lib/{{ build }}/fonts/open-sans/stylesheet.min.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/core.min.css" type="text/css" media="screen" />
+    %else:
+        <link rel="stylesheet" href="/lib/stylesheets/css/reset.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/lib/fonts/open-sans/stylesheet.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/lib/stylesheets/css/base.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/lib/stylesheets/css/jquery-ui-1.8.7.custom.css" type="text/css" media="screen" />
+    %end
+
+    %if authenticated:
+        %if compressed:
+            <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/fileuploader.min.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/lib/{{ build }}/stylesheets/css/edge.min.css" type="text/css" media="screen" />
+        %else:
+            <link rel="stylesheet" href="/lib/stylesheets/css/fileuploader.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/lib/stylesheets/css/global.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/lib/stylesheets/css/edge.css" type="text/css" media="screen" />
+        %end
+    %end
+
+    <script type="text/javascript">
+        var DEV_MODE = {{ 'true' if debug else 'false' }},
+            EDGE = {}
+        ;
+
+        EDGE.Config = {
+            Api: {
+                'base': '{{ api_url('/')}}',
+                'get': '{{ api_url('/edge/get.json') }}',
+                'set': '{{ api_url('/edge/set.json') }}',
+                'delete': '{{ api_url('/edge/delete.json') }}',
+                'batch': '{{ api_url('/edge/batch.json') }}',
+                'data': '{{ api_url('/edge/data.json') }}',
+                'heartbeat': '{{ api_url('/edge/heartbeat.json') }}',
+                'setup': '{{ api_url('/edge/setup.json') }}',
+                'feature': '{{ api_url('/edge/feature.json') }}'
+            },
+
+            Stats: {
+                url: '{{ absolute_url("/ws/stats", scheme="wss") }}',
+                debug: {{ 0 if debug else 1 }},
+                required: false
+            },
+
+            Settings: {
+                keepalive: false,
+              %if default_config_wizard:
+                defaultConfigWizard: '{{ default_config_wizard }}'
+              %else:
+                defaultConfigWizard: null
+              %end
+            },
+
+            User: {
+                username: '{{ username }}',
+                level: '{{ level }}'
+            },
+
+            Interfaces: {
+                supported: ['bridge', 'ethernet', 'switch', 'loopback', 'vlan', 'pppoe', 'nni', 'pon']
+            },
+
+            TrafficAnalysis: {
+                predefinedCategories: [
+                    'Business',
+                    'Bypass-Proxies-and-Tunnels',
+                    'File-Transfer',
+                    'Games',
+                    'Instant-messaging',
+                    'Mail-and-Collaboration',
+                    'P2P',
+                    'Remote-Access-Terminals',
+                    'Security-Update',
+                    'Social-Network',
+                    'Stock-Market',
+                    'Streaming-Media',
+                    'TopSites-Adult',
+                    'TopSites-Arts',
+                    'TopSites-Business',
+                    'TopSites-Computers',
+                    'TopSites-Games',
+                    'TopSites-Health',
+                    'TopSites-Home',
+                    'TopSites-KidsnTeens',
+                    'TopSites-News',
+                    'TopSites-Recreation',
+                    'TopSites-Reference',
+                    'TopSites-Regional',
+                    'TopSites-Science',
+                    'TopSites-Shopping',
+                    'TopSites-Society',
+                    'TopSites-Sports',
+                    'Voice-over-IP',
+                    'Web',
+                    'Web-IM'
+                ]
+            },
+
+            Features: {{! features or 'null' }}
+        };
+
+        EDGE.PowerMapping = {
+            'System power consumption': 'Consumption',
+            'POE-IN ETH0 current': 'PoE input',
+            'POE-IN ETH8 current': 'PoE input',
+            'Terminal block current': 'DC input',
+            'System input voltage': 'Input voltage'
+        };
+
+        EDGE.PowerDefault = {};
+        for (var k in EDGE.PowerMapping) {
+            EDGE.PowerDefault[EDGE.PowerMapping[k]] = 'n/a';
+        }
+
+        //backbone.js class containers
+        EDGE.Models = {};
+        EDGE.Collections = {};
+        EDGE.Views = {};
+        EDGE.Routers = {};
+
+        //initial rendered flag
+        EDGE.Rendered = false;
+        EDGE.DeviceModel = '{{ device_model if defined('device_model') else '' }}'
+    </script>
+
+    %if compressed:
+        <script type="text/javascript" src="/lib/{{ build }}/js/libs/modernizr.custom.js"></script>
+    %else:
+        <script type="text/javascript" src="/lib/js/libs/modernizr.custom.js"></script>
+    %end
+
+</head>
+<body class="{{ body_class or 'login' }} {{ device_model if defined('device_model') else '' }}" data-name="{{ model_name or '' }}">

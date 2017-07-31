@@ -1,0 +1,56 @@
+<div class="instructions" data-reboot="true">
+<p>Use this wizard to set up basic load balancing and failover
+using two wireless links.
+The setup assumes that all traffic from the "target network"
+(i.e., the network "behind" this router)
+will be routed by this router through one of the two wireless links
+to the destinations, and vice versa for traffic destined to the
+target network.
+</p>
+<p>This wizard will generate a new configuration, completely replacing the
+existing configuration.
+A reboot is required for the new configuration to take effect.</p>
+</div>
+<fieldset class="primary expanded" id="load-balancing-2">
+    <div class='lan'>
+        <div class="notation"><span data-infotip='Select the interface and enter the IPv4 address (with prefix) for the target network<br />For example, <b>192.0.3.1/24</b>'>Target network</span></div>
+        <div>
+            <div><select name='lan-interface' class='interfaces'></select></div>
+            <div><input name='lan-address' placeholder='network address' /></div>
+        </div>
+    </div>
+    <div class='eth0'>
+        <div class="notation"><span data-infotip='Select the interface and enter the IPv4 address (with prefix) for the first wireless link<br />For xample, <b>192.0.1.1/24</b>'>First link</span></div>
+        <div>
+            <div><select name='eth0-interface' class='interfaces'></select></div>
+            <div><input type='text' name='eth0-address' placeholder='first link address' /></div>
+        </div>
+    </div>
+    <div class='eth1'>
+        <div class="notation"><span data-infotip='Select the interface and enter the IPv4 address (with prefix) for the second wireless link<br />For example, <b>192.0.2.1/24</b>'>Second link</span></div>
+        <div>
+            <div><select name='eth1-interface' class='interfaces'></select></div>
+            <div><input type='text' name='eth1-address' placeholder='second link address' /></div>
+        </div>
+    </div>
+    <div class='eth0-target'>
+        <div class="notation"><span data-infotip='Enter the nexthop IPv4 address for the first link (the address on the corresponding interface of the other router)<br />For example, <b>192.0.1.2</b>'>First link nexthop</span></div>
+        <div><input type='text' name='eth0-target' placeholder='fist link nexthop address' /></div>
+    </div>
+    <div class='eth1-target'>
+        <div class="notation"><span data-infotip='Enter the nexthop IPv4 address for the second link (the address on the corresponding interface of the other router)<br />For example, <b>192.0.2.2</b>'>Second link nexthop</span></div>
+        <div><input type='text' name='eth1-target' placeholder='second link nexthop address' /></div>
+    </div>
+    <div class='failover'><input name='failover' type='checkbox' value='true' />Failover only</div>
+</fieldset>
+
+<div class="reset-manual hidden" data-reboot="true">
+    <p>The current configuration will be replaced and a reboot is required
+    for the new configuration to take effect. To reconnect to the router
+    after the reboot:</p>
+    <ul>
+        <li>Connect the client device (e.g., laptop) to the network port.</li>
+        <li>Assign a IP address within the same subnet with network.</li>
+        <li>Use browser to go to network's IP.</li>
+    </ul>
+</div>

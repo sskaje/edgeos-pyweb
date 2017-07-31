@@ -1,0 +1,97 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+pfx="service upnp listen-on"
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+
+load () {
+    nodes=$(cli-shell-api listActiveNodes $pfx)
+    eval "ints=($nodes)"
+    str=''
+    for int in "${ints[@]}"; do
+        ext=$(cli-shell-api returnActiveValue $pfx $int outbound-interface)
+        [ -n "$str" ] && str+=','
+        str+="{\"upnp-lan\":\"$int\",\"upnp-wan\":\"$ext\"}"
+    done
+
+    intfs=($(ls /sys/class/net/ | grep -v '^lo$' | grep -v '^bonding_masters$'))
+    ilist=''
+    for int in "${intfs[@]}"; do
+        [ -n "$ilist" ] && ilist+=','
+        ilist+="\"$int\""
+    done
+    ilist="{\"options\":[$ilist],\"other\":\"true\"}"
+
+    echo -n "{\"success\":\"1\",\"data\":{\"upnp-config\":[$str]},"
+    echo "\"definition\":{\"upnp-lan\":$ilist,\"upnp-wan\":$ilist}}"
+}
+
+apply () {
+    local ret=0
+    local output=''
+    local -A ints
+
+    eval "nints=($(cat $INPUT | jq '."upnp-config"[]."upnp-lan"'))"
+    eval "nexts=($(cat $INPUT | jq '."upnp-config"[]."upnp-wan"'))"
+
+    for ((i = 0; i < ${#nints[@]}; i++)); do
+        int="${nints[i]}"
+        ext="${nexts[i]}"
+        if [ "$int" == "$ext" ]; then
+            ret=1
+            output='Internal and external interfaces cannot be the same'
+            break
+        fi
+        if [ -n "${ints[$int]}" ]; then
+            ret=1
+            output='The same internal interface can only be in one entry'
+            break
+        fi
+        ints[$int]=1
+    done
+
+    if [ $ret == 0 ]; then
+        tfile=$(mktemp)
+        (
+        $cmd begin
+        ret=0
+        $cmd delete $pfx || ret=1
+        for ((i = 0; i < ${#nints[@]}; i++)); do
+            if ! $cmd set $pfx "${nints[i]}" \
+                    outbound-interface "${nexts[i]}"; then
+                ret=1
+                break
+            fi
+        done
+        if [ $ret == 0 ]; then
+            $cmd commit || ret=1
+        fi
+        if [ $ret == 0 ]; then
+            $cmd save || ret=1
+        fi
+        $cmd end
+        exit $ret
+        ) >$tfile 2>&1
+        ret=$?
+
+        output=$(cat $tfile)
+        rm -f $tfile
+    fi
+
+    if [ $ret == 0 ]; then
+        echo "{\"success\":\"1\"}"
+    else
+        echo "{\"success\":\"0\",\"error\": \"${output//\"/\'}\"}"
+    fi
+}
+
+case "$ACTION" in
+    load)
+        load
+        ;;
+    apply)
+        apply
+        ;;
+esac

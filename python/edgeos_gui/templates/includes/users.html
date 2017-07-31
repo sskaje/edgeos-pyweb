@@ -1,0 +1,227 @@
+<!-- Start: Users -->
+
+<div id="Users" class="main-section">
+</div>
+
+<script id="UsersTemplate" type="text/template">
+  \<% if (showRemote) { %>
+    <div class="section-tabs">
+      <ul>
+        <li><a href="#Users/Local" data-container="UsersLocal">Local</a></li>
+        <li><a href="#Users/Remote" data-container="UsersRemote">Remote</a></li>
+      </ul>
+    </div>
+  \<% }; %>
+  <div class="section-container tall tabbed">
+    <div id="UsersLocal" class="wide tall"></div>
+    \<% if (showRemote) { %>
+      <div id="UsersRemote" class="wide tall"></div>
+    \<% }; %>
+  </div>
+</script>
+
+<script id="UsersLocalTemplate" type="text/template">
+  <div class="section-container table-container">
+    <div id="UserLocalAdd" class="add">
+      <button type="button">Add User</button>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Level</th>
+          <th>Active Sessions</th>
+          <th>Date Connected</th>
+          <th>Uptime</th>
+          <th>Status</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="UsersLocalCreateTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="username<%= id %>">Username</label>
+            <div>
+              <input type="text" id="username<%= id %>" name="username" class="text-input" />
+            </div>
+
+            <label class="primary" for="fullname<%= id %>">Full Name</label>
+            <div>
+              <input type="text" id="fullname<%= id %>" name="fullname" class="text-input" />
+            </div>
+
+            <label class="primary required" for="password<%= id %>">Password</label>
+            <div>
+              <input type="password" id="password<%= id %>" name="password" class="text-input" />
+            </div>
+
+            <label class="primary required" for="confirm<%= id %>">Confirm</label>
+            <div>
+              <input type="password" id="confirm<%= id %>" name="confirm" class="text-input" />
+            </div>
+
+            <label class="primary required" for="level<%= id %>">Role</label>
+            <div>
+              <select name="level" id="level<%= id %>">
+                <option value="admin">Admin</option>
+                <option value="operator">Operator</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="UsersRemoteTemplate" type="text/template">
+  <div class="section-container table-container">
+    <div id="UsersRemoteFilters" class="filters">
+      <ul class="ui-tabs-buttonset">
+        <li class="pptp"><a href="#Users/Remote/filter/pptp">PPTP</a></li>
+        <li class="l2tp"><a href="#Users/Remote/filter/l2tp">L2TP</a></li>
+        <li class="pppoe"><a href="#Users/Remote/filter/pppoe">PPPOE</a></li>
+        <li class="all"><a href="#Users/Remote">All</a></li>
+      </ul>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Time</th>
+          <th>Interface</th>
+          <th>Remote IP</th>
+          <th>Tx packets</th>
+          <th>Tx bytes</th>
+          <th>Rx packets</th>
+          <th>Rx bytes</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="UsersRemoteCreateTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="username<%= id %>">Username</label>
+            <div>
+              <input type="text" id="username<%= id %>" name="username" class="text-input" />
+            </div>
+
+            <label class="primary" for="fullname<%= id %>">Full Name</label>
+            <div>
+              <input type="text" id="fullname<%= id %>" name="fullname" class="text-input" />
+            </div>
+
+            <label class="primary required" for="password<%= id %>">Password</label>
+            <div>
+              <input type="password" id="password<%= id %>" name="password" class="text-input" />
+            </div>
+
+            <label class="primary required" for="confirm<%= id %>">Confirm</label>
+            <div>
+              <input type="password" id="confirm<%= id %>" name="confirm" class="text-input" />
+            </div>
+          </fieldset>
+
+          <fieldset class="primary spaced">
+            <legend class="inline grouped">Subscribed Services</legend>
+
+            <ul class="inline">
+              <li><label class="inline"><input type="checkbox" name="pppoe" value="pppoe" class="check-box-input" /> PPPOE</label></li>
+              <li><label class="inline"><input type="checkbox" name="l2tp" value="l2tp" class="check-box-input" /> L2TP</label></li>
+              <li><label class="inline"><input type="checkbox" name="pptp" value="pptp" class="check-box-input" /> PPTP</label></li>
+            </ul>
+          </fieldset>
+
+          <fieldset class="actions flush">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="UsersConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content local">
+        <fieldset class="primary">
+          <label class="primary" for="username<%= id %>">Username</label>
+          <div class="readonly"><%= username %></div>
+
+          <label class="primary" for="fullname<%= id %>">Full Name</label>
+          <div>
+            <input type="text" id="fullname<%= id %>" name="fullname" class="text-input" />
+          </div>
+
+          <label class="primary required" for="level<%= id %>">Role</label>
+          <div>
+            <select name="level" id="level<%= id %>">
+              <option value="admin">Admin</option>
+              <option value="operator">Operator</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary spacer writeonly">
+          <div class="swapped password encrypted default">
+            <label class="primary">Password</label>
+            <div>******** <button type="button" class="plaintext">Change Password</button></div>
+          </div>
+
+          <div class="swapped password changed">
+            <label class="primary required" for="password<%= id %>">Password</label>
+            <div>
+              <input type="password" id="password<%= id %>" name="password" class="text-input" />
+            </div>
+
+            <label class="primary required" for="confirm<%= id %>">Confirm</label>
+            <div>
+              <input type="password" id="confirm<%= id %>" name="confirm" class="text-input" />
+            </div>
+
+            <div class="indented">
+              <button type="button" class="plaintext">Cancel Change Password</button>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save" data-section="primary">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="UsersLocalDropDownButtonTemplate" type="text/template">
+    <button type="button">Actions</button>
+    <ul class="action-list">
+        <li><a class="action-config" href="#">Config</a></li>
+        <li><a class="action-delete" href="#">Delete</a></li>
+    </ul>
+</script>
+<!-- End: Users -->

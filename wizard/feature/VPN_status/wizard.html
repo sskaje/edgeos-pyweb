@@ -1,0 +1,23 @@
+<div class="instructions">
+    SITE to SITE VPN Status
+</div>
+<div class="instructions">
+Readonly list. Changes need to be made in VPN tab.
+</div>
+
+<fieldset name="VPN_Status" class="primary expanded">    
+  <legend>VPN Status List</legend>
+  <div class="addable"  data-object="peer-list" data-objectify="1">
+    <div class="addable-template">
+       <div><input disabled type="text" class="hostname" name="description" style="border:1;background:none;width:160px;margin-right:15px;"/></div>
+       <div><input disabled type="text" class="hostname" name="peerip" style="border:1;background:none;width:160px;margin-right:15px;"/></div>
+       <div><input disabled type="text" class="hostname" name="ike-all" style="border:1;background:none;width:140px;margin-right:15px;"/></div>
+       <div><input disabled type="text" class="hostname" name="tunnel-status" style="border:1;background:none;width:50px;margin-right:15px;font-weight:bold;"/></div>
+    </div>
+    <table class="addable-container">
+      <tr><th>Name</th><th>Peer IP</th><th>IKE</th><th>Status</th></tr>
+    </table>
+    <button type="button" class="addable-add hidden"></button>
+    <button type="button" class="addable-remove hidden"></button>
+  </div>
+</fieldset>

@@ -1,0 +1,28 @@
+{
+    "rules": {
+		"eth1-static-address": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth1-static-mask": {
+			"required": true,
+			"ipv4maskOrPfx": 1
+		},
+		"eth1-static-gateway": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth1-static-dns": {
+			"required": true,
+			"ipv4": 1
+		},
+		"eth1-pppoe-userid": {
+			"required": true,
+			"noQuotes": 1
+		},
+		"eth1-pppoe-password": {
+			"required": true,
+			"noQuotes": 1
+		}
+	}
+}

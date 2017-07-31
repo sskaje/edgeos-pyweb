@@ -1,0 +1,17 @@
+#vt100 #scrollable {
+    color: #FFFFFF;
+    background: rgb(0, 0, 0);
+}
+
+#vt100 #scrollable.inverted {
+    color: #000000;
+    background: #FFFFFF;
+}
+
+#vt100 .ansi15 {
+    color: #000000;
+}
+
+#vt100 .bgAnsi0 {
+    background-color: #ffffff;
+}

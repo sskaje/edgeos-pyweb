@@ -1,0 +1,78 @@
+{
+    "rules": {
+        "vid": {
+            "required": true,
+            "range": [0, 4094]
+        },
+        "ip": {
+            "required": true,
+            "ipv4withMask": 1
+        },
+        "eth0pvid": {
+            "range": [1, 4087]
+        },
+        "eth0vid": {
+            "validVids": 1
+        },
+        "eth1pvid": {
+            "range": [1, 4087]
+        },
+        "eth1vid": {
+            "validVids": 1
+        },
+        "eth2pvid": {
+            "range": [1, 4087]
+        },
+        "eth2vid": {
+            "validVids": 1
+        },
+        "eth3pvid": {
+            "range": [1, 4087]
+        },
+        "eth3vid": {
+            "validVids": 1
+        },
+        "eth4pvid": {
+            "range": [1, 4087]
+        },
+        "eth4vid": {
+            "validVids": 1
+        },
+        "eth5pvid": {
+            "range": [1, 4087]
+        },
+        "eth5vid": {
+            "validVids": 1
+        },
+        "ubnt-password": {
+            "required": true,
+            "minlength": 4,
+            "noQuotes": 1
+        },
+        "ubnt-confirm-password": {
+            "required": true,
+            "noQuotes": 1,
+            "minlength": 4,
+            "equalTo": "[name=ubnt-password]"
+        },
+        "new-user": {
+            "required": true,
+            "noWhiteSpace": true,
+            "noshellpunctuation": true,
+            "minlength": 2,
+            "maxlength": 32,
+            "validUserId": true
+        },
+        "new-password": {
+            "required": true,
+            "minlength": 4,
+            "noQuotes": 1
+        },
+        "new-confirm-password": {
+            "required": true,
+            "noQuotes": 1,
+            "minlength": 4,
+            "equalTo": "[name=new-password]"
+        }
+	}
+}

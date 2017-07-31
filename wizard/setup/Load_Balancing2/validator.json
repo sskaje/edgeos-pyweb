@@ -1,0 +1,46 @@
+{
+    "rules": {
+        "lan-interface": {
+            "required": true,
+            "notEqualTo": "[name=eth1-interface]"
+        },
+        "lan-address": {
+            "required": true,
+            "ipv4NoBcast": true,
+            "ipv4NoNet": true,
+            "differentSubnet": "[name=eth1-address]"
+        },
+        "eth0-interface": {
+            "required": true,
+            "notEqualTo": "[name=lan-interface]"
+        },
+        "eth0-address": {
+            "required": true,
+            "ipv4NoBcast": true,
+            "ipv4NoNet": true,
+            "differentSubnet": "[name=lan-address]"
+        },
+        "eth1-interface": {
+            "required": true,
+            "notEqualTo": "[name=eth0-interface]"
+        },
+        "eth1-address": {
+            "required": true,
+            "ipv4NoBcast": true,
+            "ipv4NoNet": true,
+            "differentSubnet": "[name=eth0-address]"
+        },
+        "eth0-target": {
+            "required": true,
+            "ipv4": 1,
+            "sameSubet": "[name=eth0-address]",
+            "notSameIp": "[name=eth0-address]"
+        },
+        "eth1-target": {
+            "required": true,
+            "ipv4": 1,
+            "sameSubet": "[name=eth1-address]",
+            "notSameIp": "[name=eth1-address]"
+        }
+    }
+}

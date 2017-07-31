@@ -1,0 +1,187 @@
+{
+    "EP-R6": {
+        "name": "EdgePoint Router 6-Port",
+        "class": "port6A",
+        "features": {
+            "ports": 6,
+            "poe": true,
+            "switch": {
+                "ports": [
+                    "eth0",
+                    "eth1",
+                    "eth2",
+                    "eth3",
+                    "eth4",
+                    "eth5"
+                ]
+            }
+        }
+    },
+    "EP-R8": {
+        "name": "EdgePoint Router 8-Port",
+        "class": "port8A",
+        "features": {
+            "ports": 8,
+            "poe": true,
+            "sfp": {
+                "ports": [
+                    "eth6",
+                    "eth7"
+                ]
+            }
+        }
+    },
+    "EP-ON": {
+        "name": "EdgePoint Router Instant",
+        "class": "port6A",
+        "features": {
+            "ports": 6,
+            "poe": true,
+            "sfp": {
+                "ports": [
+                    "eth0",
+                    "eth1",
+                    "eth2",
+                    "eth3",
+                    "eth4",
+                    "eth5"
+                ]
+            }
+        }
+    },
+    "ER-X": {
+        "name": "EdgeRouter X",
+        "class": "port5A",
+        "features": {
+            "ports": 5,
+            "poe": true,
+            "switch": {
+                "ports": [
+                    "eth0",
+                    "eth1",
+                    "eth2",
+                    "eth3",
+                    "eth4"
+                ]
+            }
+        }
+    },
+    "ER-X-SFP": {
+        "name": "EdgeRouter X SFP",
+        "class": "port6",
+        "features": {
+            "ports": 6,
+            "poe": true,
+            "switch": {
+                "ports": [
+                    "eth0",
+                    "eth1",
+                    "eth2",
+                    "eth3",
+                    "eth4",
+                    "eth5"
+                ]
+            }
+        }
+    },
+    "ER-8": {
+        "name": "EdgeRouter",
+        "class": "port8",
+        "features": {
+            "ports": 8,
+            "poe": false
+        }
+    },
+    "ER-8-XG": {
+        "name": "EdgeRouter Infinity",
+        "class": "port9",
+        "features": {
+            "ports": 9,
+            "poe": false
+        }
+    },
+    "ERLite-3": {
+        "name": "EdgeRouter Lite",
+        "class": "port3",
+        "features": {
+            "ports": 3,
+            "poe": false
+        }
+    },
+    "ERPoe-5": {
+        "name": "EdgeRouter PoE",
+        "class": "port5",
+        "features": {
+            "ports": 5,
+            "poe": true,
+            "switch": {
+                "ports": [
+                    "eth2",
+                    "eth3",
+                    "eth4"
+                ]
+            }
+        }
+    },
+    "ERPro-8": {
+        "name": "EdgeRouter Pro",
+        "class": "port8",
+        "features": {
+            "ports": 8,
+            "poe": false,
+            "sfp": {
+                "ports": [
+                    "eth6",
+                    "eth7"
+                ]
+            }
+        }
+    },
+    "ER-4": {
+        "name": "EdgeRouter 4",
+        "class": "port4",
+        "features": {
+            "ports": 4,
+            "poe": false,
+            "sfp": {
+                "ports": [
+                    "eth3"
+                ]
+            }
+        }
+    },
+    "ER-6": {
+        "name": "EdgeRouter 6",
+        "class": "port6",
+        "features": {
+            "ports": 6,
+            "poe": true,
+            "sfp": {
+                "ports": [
+                    "eth5"
+                ]
+            }
+        }
+    },
+    "UF-OLT": {
+        "name": "Fiber OLT",
+        "class": "port11",
+        "features": {
+            "ports": 11,
+            "poe": false
+        },
+        "default_config_wizard": null,
+        "gui_features": {
+            "support_file_download": true,
+            "gpon_mtu_size": true
+        }
+    },
+    "unknown": {
+        "name": "unknown device",
+        "class": "unknown",
+        "features": {
+            "ports": 1,
+            "poe": false
+        }
+    }
+}

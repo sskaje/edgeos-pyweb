@@ -1,0 +1,20 @@
+<!-- Start: Time and Date -->
+<div id="TimePanel" class="unrendered">
+  <span class="time">00:00:00</span>
+  <span class="date">00/00/0000</span>
+  <a id="ClockSettingsButton" class="ir rounded-button"><span class="ir ubntui-alpha-sprite icon"></span>set clock</a>
+</div>
+
+<script type="text/javascript">
+$(function() {
+  if ($().jtimer) {
+    $('#TimePanel').jtimer({interval: 1}).bind('jtimer.due', function(e, o) {
+      var now = new Date();
+      $('#TimePanel span.time').html(V.formatTime(now));
+      $('#TimePanel span.date').html(V.formatDate(now));
+
+    }).jtimer('start');
+  }
+});
+</script>
+<!-- End: Time and Date -->

@@ -1,0 +1,83 @@
+<!-- Start: Wizard -->
+<div id="Wizard" class="main-section">
+  <div class="section-container tall"></div>
+</div>
+
+<script id="WizardTemplate" type="text/template">
+  <div class="loading"></div>
+  <div class="wizards">
+    <div class="list ui-layout-west">
+      <!-- wizard list template -->
+    </div>
+    <div class="form ui-layout-center">
+      <form method="post" class="wizard-form">
+        <!-- wizard instructions -->
+        <!-- wizard template buttons -->
+      </form>
+    </div>
+  </div>
+</script>
+
+<script id="WizardListTemplate" type="text/template">
+  <div class="section-title"><%= title %></div>
+  <div class="section-container <%= type %>">
+    <ul></ul>
+  </div>
+</script>
+
+<script id="WizardInstructionsTemplate" type="text/template">
+  <div class="instructions">
+    <p>Please choose a wizard from the left.</p>
+    <p class="is-default">The <strong>setup wizards</strong> are only available if your router is using the default configuration. If you <em>Test</em> or <em>Apply</em> a wizard configuration and you leave the Wizards tab you will not be able to use a setup wizard again.</p>
+    <p class="isnt-default">The <strong>setup wizards</strong> are not available to you because you have changed the router's configuration. If you wish to use a setup wizard you must reset the router to its default configuration and then restart it.</p>
+  </div>
+</script>
+
+<script id="WizardLockedTemplate" type="text/template">
+  <div class="locked">
+    <div class="locked-container">
+      <div class="lock-icon"></div>
+      <p>This template is currently unavailable because the router's configuration has been changed. Please reset the configuration back to the default settings if you wish to use a setup wizard.</p>
+      <button type="button">Reset to Default Configuration</button>
+    </div>
+  </div>
+</script>
+
+<script id="WizardButtonsTemplate" type="text/template">
+  <fieldset class="actions">
+    <div>
+      <button type="button" class="delete">Delete</button>
+      <button type="button" class="cancel">Cancel</button>
+      <button type="submit" class="apply">Apply</button>
+      <button type="button" class="remove hidden">Delete From List</button>
+    </div>
+  </fieldset>
+</script>
+
+<script id="WizardUploadTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <input type="hidden" name="type" value="<%= type %>" />
+
+    <div class="scrollable">
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="wizard-name<%= id %>">Wizard Name</label>
+            <div>
+              <input type="text" id="wizard-name<%= id %>" name="wizard-name" class="text-input" />
+            </div>
+
+            <label class="primary required">Wizard Files</label>
+            <div>
+              <div class="wizard-files"></div>
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>

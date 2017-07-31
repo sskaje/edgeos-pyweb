@@ -1,0 +1,23 @@
+<div class="instructions">
+    UPnP configuration
+</div>
+
+<fieldset name="upnp" class="primary expanded">
+    <legend>Set up UPnP interfaces</legend>
+
+    <div class="addable" data-min="0" data-max="10" data-object="upnp-config" data-objectify="1">
+        <div class="addable-template">
+            <div class="multi">
+                <span class="text">Internal interface</span>
+                <span><select name="upnp-lan" /></span>
+                <span class="text">External interface</span>
+                <span><select name="upnp-wan" /></span>
+                <span><button type="button" class="addable-remove">Remove</button></span>
+            </div>
+        </div>
+        <div class="addable-container">
+            <!-- the addables will be inserted here -->
+        </div>
+        <button type="button" class="addable-add">Add New</button>
+    </div>
+</fieldset>

@@ -1,0 +1,12 @@
+{
+    "rules": {
+        "upnp-lan": {
+            "required": true,
+            "interfaceName": 1
+        },
+        "upnp-wan": {
+            "required": true,
+            "interfaceName": 1
+        }
+    }
+}

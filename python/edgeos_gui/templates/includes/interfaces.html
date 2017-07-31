@@ -1,0 +1,754 @@
+<!-- Start: Interfaces -->
+<div id="Interfaces" class="main-section">
+  <h1 class="section-title">Interfaces</h1>
+  <div class="section-container tall"></div>
+</div>
+
+<script id="InterfacesDefaultTemplate" type="text/template">
+  <div id="InterfaceList" class="table-container">
+    <div id="InterfaceAdd" class="add">
+    </div>
+    <div id="InterfaceFilters" class="filters">
+      <ul class="ui-tabs-buttonset">
+        <li class="all"><a href="#<%= section %>">All</a></li>
+        <li class="ethernet"><a href="#<%= section %>/filter/ethernet">Ethernet</a></li>
+        <li class="vlan"><a href="#<%= section %>/filter/vlan">VLAN</a></li>
+        <li class="pppoe"><a href="#<%= section %>/filter/pppoe">PPPoE</a></li>
+        <!--<li class="bridge"><a href="#<%= section %>/filter/bridge">Bridge</a></li>-->
+      </ul>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Interface</th>
+          <th>Type</th>
+          <th>PoE</th>
+          <th>IP Addr</th>
+          <th>MTU</th>
+          <th>Tx</th>
+          <th>Rx</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="InterfacesCreatePppoeTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary required" for="pppoe<%= id %>">PPPoE ID</label>
+          <div>
+            <input type="text" id="pppoe<%= id %>" name="pppoe" class="text-input" data-infotip="PPPoE ID must be between 0 and 15"/>
+          </div>
+          <label class="primary required" for="interface<%= id %>">Interface</label>
+          <div>
+            <select name="interface" id="interface<%= id %>>
+              <option value="">- select -</option>
+            </select>
+          </div>
+        </fieldset>
+        <fieldset class="primary">
+          <label class="primary" for="user<%= id %>">Account Name</label>
+          <div>
+            <input type="text" id="user<%= id %>" name="user" class="text-input" />
+          </div>
+          <label class="primary" for="password<%= id %>" >Password</label>
+          <div>
+            <input type="password" id="password<%= id %>" name="password" class="text-input" />
+            <input type="checkbox" id="showpw<%= id %>" name="showpw" />
+          </div>
+        </fieldset>
+        <fieldset class="primary">
+          <div class="createvlanmtu">
+            <label class="primary" for="mtu<%= id %>">MTU</label>
+            <div>
+              <input type="text" id="mtu<%= id %>" name="mtu" value="" class="text-input" data-infotip="Maximum Transmission Unit 68-1500"/>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesCreateVlanTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary required" for="vif<%= id %>">VLAN ID</label>
+          <div>
+            <input type="text" id="vif<%= id %>" name="vif" class="text-input" data-infotip="VLAN ID must be between 0 and 4094"/>
+          </div>
+
+          <label class="primary required" for="interface<%= id %>">Interface</label>
+          <div>
+            <select name="interface" id="interface<%= id %>>
+              <option value="">- select -</option>
+            </select>
+          </div>
+
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input">
+          </div>
+
+          <div class="createvlanmtu"><label class="primary" for="mtu<%= id %>">MTU</label>
+          <div>
+            <input type="text" id="mtu<%= id %>" name="mtu" value="1500" class="text-input" data-infotip="Maximum Transmission Unit 68-9000 (default 1500)"/>
+          </div></div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary" data-field="address">Address</legend>
+          <fieldset class="addresses">
+            <div class="address">
+              <select name="address">
+                <option value="">No address</option>
+                <option value="dhcp">Use DHCP</option>
+                <option value="dhcpv6">Use DHCP for IPv6</option>
+                <option value="ip">Manually define IP address</option>
+              </select>
+              <div class="nested ip-section">
+                <div>
+                  <input type="text" class="text-input ip-member"
+                         data-infotip="IPv4 or IPv6 address with prefix<br/><br/>Example: <b>192.0.2.1/24</b>, <b>2001:db8:1000::1/64</b>"/>
+                </div>
+              </div>
+              <div class="nested dhcp">
+                <button type="button" class="renew">Renew</button>
+                <button type="button" class="release">Release</button>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigSfpTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary" for="speed<%= id %>">Link negotiation</label>
+          <div>
+            <select id="speed<%= id %>" name="speed">
+              <option value='1000'>1000Mbps</option>
+              <option value='10G'>10Gbps</option>
+            </select>
+          </div>
+        </fieldset>
+        <fieldset class="primary">
+          <label class="primary" for="native-vlan<%= id %>">Native VLAN</label>
+          <div>
+            <input type="text" id="native-vlan<%= id %>" name="native-vlan" class="text-input onu-vlan-id" placeholder="No native VLAN"/>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="primary" data-field="address">Include VLANs</legend>
+          <fieldset class="include-vlans">
+            <div class="include-vlan">
+              <label class="primary" for="vlan-id<%= id %>">VLAN ID</label>
+              <div>
+                <input type="text" id="vlan-id<%= id %>" name="vlan-id" class="text-input onu-vlan-id"/>
+                <a class="delete-vlan" href="#" title="Delete">&times;</a>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigPonTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" placeholder="<%= id %>" class="text-input"/>
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input"/>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigEthernetTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    %if poe:
+      <div class="dialog-tabs">
+        <ul>
+          <li><a href="#config">Config</a></li>
+          <li><a href="#poe">PoE</a></li>
+        </ul>
+      </div>
+    %end
+
+    <div class="scrollable">
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" placeholder="<%= id %>" class="text-input"/>
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input"/>
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary" data-field="address">Address</legend>
+          <fieldset class="addresses">
+            <div class="address">
+              <select name="address">
+                <option value="">No address</option>
+                <option value="dhcp">Use DHCP</option>
+                <option value="dhcpv6">Use DHCP for IPv6</option>
+                <option value="ip">Manually define IP address</option>
+              </select>
+              <div class="nested ip-section">
+                <div>
+                  <input type="text" class="text-input ip-member"
+                         data-infotip="IPv4 or IPv6 address with prefix<br/><br/>Example: <b>192.0.2.1/24</b>, <b>2001:db8:1000::1/64</b>"/>
+                </div>
+              </div>
+              <div class="nested dhcp">
+                <button type="button" class="renew">Renew</button>
+                <button type="button" class="release">Release</button>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+
+        <fieldset class="primary">
+          <label class="primary" for="mtu<%= id %>">MTU</label>
+          <div>
+            <input type="text" id="mtu<%= id %>" name="mtu" value="1500" class="text-input" data-infotip="Maximum Transmission Unit 68-9000 (default 1500)"/>
+          </div>
+
+          <label class="primary" for="speed<%= id %>">Speed/Duplex</label>
+          <div>
+            <select name="speed" id="speed<%= id %>">
+              <option value="auto-auto">Auto negotiation</option>
+              \<% if ($('body').hasClass('port9')) { %>
+              <option value="10000-full">10000/full</option>
+              <option value="1000-full">1000/full</option>
+              \<% } %>
+              <option value="100-full">100/full</option>
+              <option value="100-half">100/half</option>
+              <option value="10-full">10/full</option>
+              <option value="10-half">10/half</option>
+            </select>
+          </div>
+
+          <label class="primary" for="enable-proxy-arp<%= id %>">Proxy ARP</label>
+          <div>
+            <input type="checkbox" id="enable-proxy-arp<%= id %>" name="enable-proxy-arp" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+      </div>
+
+      %if poe:
+        <div class="tab-content poe">
+          <fieldset class="primary">
+            <label class="primary" for="poe-output<%= id %>">PoE</label>
+            <div class="noted">
+              <select name="poe-output" id="poe-output<%= id %>">
+                <option value="off">Off</option>
+                <option value="24v">24V</option>
+                <option value="48v">48V</option>
+                <option value="24v-4pair">24V-4pair</option>
+                <option value="54v-4pair">54V-4pair</option>
+                <option value="pthru">Passthrough</option>
+              </select>
+              <span>WARNING: Connected device MUST support selected voltage!</span>
+            </div>
+          </fieldset>
+
+          <fieldset class="primary watchdog">
+            <legend class="primary">PoE Watchdog</legend>
+
+            <label class="primary" for="poe-enable-watchdog<%= id %>">Enable Watchdog</label>
+            <div class="noted">
+              <input type="checkbox" id="poe-enable-watchdog<%= id %>" name="poe-enable-watchdog" value="1" class="check-box-input" />
+              <span>Cutting power during FW upgrade will damage your device. Make sure you specify safe Ping Interval</span>
+            </div>
+
+            <div class="watchdog-options">
+              <label class="primary required" for="poe-address<%= id %>">IP Address</label>
+              <div>
+                <input type="text" id="poe-address<%= id %>" name="poe-address" class="text-input" data-infotip="IPv4 or IPv6 address to ping" />
+              </div>
+
+              <label class="primary" for="poe-interval<%= id %>">Ping Interval</label>
+              <div class="timed">
+                <input type="text" id="poe-interval<%= id %>" name="poe-interval" class="text-input"  data-infotip="Seconds between ping interval (default 15)"/>
+              </div>
+
+              <label class="primary" for="poe-start-delay<%= id %>">Startup Delay</label>
+              <div class="timed">
+                <input type="text" id="poe-start-delay<%= id %>" name="poe-start-delay" class="text-input" data-infotip="Seconds to wait before starting to ping at<br/>start up and after power-cycle (default 300)"/>
+              </div>
+
+              <label class="primary" for="poe-failure-count<%= id %>">Failure Count</label>
+              <div>
+                <input type="text" id="poe-failure-count<%= id %>" name="poe-failure-count" class="text-input" data-infotip="Number of consecutive failures before power-cycle (default 3)"/>
+              </div>
+
+              <label class="primary" for="poe-off-delay<%= id %>">Cut power for</label>
+              <div class="timed">
+                <input type="text" id="poe-off-delay<%= id %>" name="poe-off-delay" class="text-input" data-infotip="Seconds to wait after power off (default 5)"/>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      %end
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigSwitchTemplate" type="text/template">
+  <form method="post" class="ui-form">
+        \<% if (vlanConfig) { %>
+        <div class="dialog-tabs">
+            <ul>
+                <li><a href="#basic">Config</a></li>
+                <li><a href="#vlan">Vlan</a></li>
+            </ul>
+        </div>
+        \<% } %>
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" placeholder="<%= id %>" class="text-input" />
+          </div>
+
+          <label class="hidden" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="hidden" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary" data-field="address">Address</legend>
+          <fieldset class="addresses">
+            <div class="address">
+              <select name="address">
+                <option value="">No address</option>
+                <option value="dhcp">Use DHCP</option>
+                <option value="dhcpv6">Use DHCP for IPv6</option>
+                <option value="ip">Manually define IP address</option>
+              </select>
+              <div class="nested ip-section">
+                <div>
+                  <input type="text" class="text-input ip-member"
+                         data-infotip="IPv4 or IPv6 address with prefix<br/><br/>Example: <b>192.0.2.1/24</b>, <b>2001:db8:1000::1/64</b>"/>
+                </div>
+              </div>
+              <div class="nested dhcp">
+                <button type="button" class="renew">Renew</button>
+                <button type="button" class="release">Release</button>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+
+        %if defined('switch') and switch:
+          \<% if (!vlanConfig) { %>
+          <fieldset class="primary switch-ports">
+            <legend class="primary" data-field="switch-ports">Switch Ports</legend>
+            <ul>
+              %for interface in switch['ports']:
+              <li><label class="inline"><input type="checkbox"
+                                               name="switch-ports" value="{{ interface }}"
+                                               class="check-box-input"/> {{ interface }}</label></li>
+              %end
+            </ul>
+          </fieldset>
+          \<% } %>
+        %end
+
+        <fieldset class="primary">
+          <label class="primary" for="enable-proxy-arp<%= id %>">Proxy ARP</label>
+          <div>
+            <input type="checkbox" id="enable-proxy-arp<%= id %>" name="enable-proxy-arp" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+      </div>
+
+      \<% if (vlanConfig) { %>
+      <div class="tab-content vlan">
+      </div>
+      \<% } %>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigSwitchVlanTemplate" type="text/template">
+  <fieldset class="primary vlan-aware">
+    <legend class="primary" data-field="vlan-aware">VLAN Aware</legend>
+    <div>
+    <input type="checkbox" id="vlan-aware<%= id %>"
+        name="vlan-aware" value="1" class="check-box-input" />
+    <span class="checkbox">Enabled</span>
+    </div>
+  </fieldset>
+  <fieldset class="primary switch-ports" name="switch-ports">
+    <legend class="primary" data-field="switch-ports">Switch Ports</legend>
+    <div class="instructions hidden">
+        Config pvid and vid for each switch port. Multiple values is supported for vid.
+    </div>
+    <ul class="vlan fullwidth">
+      %if defined('switch') and switch:
+        %for interface in switch['ports']:
+          <li>
+            <label class="inline switch-port"><input type="checkbox" name="switch-ports" value="{{ interface }}" class="vlan check-box-input" /> {{ interface }}</label>
+            <fieldset class="vlan">
+              <label class="primary" for="pvid{{ interface }}">pvid</label>
+              <div>
+                <input type="text" id="pvid{{ interface }}" name="{{ interface }}pvid" class="text-vlan pvid" data-infotip="Port Virtual Local Area Network (VLAN) ID. 1-4087" />
+              </div>
+
+              <label class="primary" for="vid{{ interface }}">vid</label>
+              <div class="vids">
+                <input type="text" id="vid{{ interface }}" name="{{ interface }}vid" class="vid-member-{{ interface }} vid-member text-vlan" data-infotip="Virtual Local Area Network (VLAN) ID. Multiple vids allowed. Separate each vids with comma. 1-4087" />
+              </div>
+              </fieldset>
+          </li>
+        %end
+      %end
+    </ul>
+  </fieldset>
+</script>
+
+<script id="InterfacesConfigBridgeTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="dialog-tabs">
+      <ul>
+        <li><a href="#basic">Basic</a></li>
+        <li><a href="#advanced">Advanced</a></li>
+        <li><a href="#interfaces">Bridge Interfaces</a></li>
+      </ul>
+    </div>
+
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" placeholder="<%= id %>" class="text-input" />
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary" data-field="address">Address</legend>
+          <fieldset class="addresses">
+            <div class="address">
+              <select name="address">
+                <option value="">No address</option>
+                <option value="dhcp">Use DHCP</option>
+                <option value="dhcpv6">Use DHCP for IPv6</option>
+                <option value="ip">Manually define IP address</option>
+              </select>
+              <div class="nested ip-section">
+                <div>
+                  <input type="text" class="text-input ip-member" data-infotip="IPv4 or IPv6 address with prefix<br/><br/>Example: <b>192.0.2.1/24</b>, <b>2001:db8:1000::1/64</b>"/>
+                </div>
+              </div>
+              <div class="nested dhcp">
+                <button type="button" class="renew">Renew</button>
+                <button type="button" class="release">Release</button>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+
+        <fieldset class="primary highlight delete">
+          <label class="inline"><input type="checkbox" name="delete" value="1" class="check-box-input" /> Permanently delete this bridge</label>
+        </fieldset>
+      </div>
+
+      <div class="tab-content advanced">
+        <fieldset class="primary">
+          <label class="primary" for="priority<%= id %>">Priority</label>
+          <div>
+            <input type="text" id="priority<%= id %>" name="priority" placeholder="0" class="text-input" data-type="int" />
+          </div>
+
+          <label class="primary" for="forwarding-delay<%= id %>">Forwarding Delay</label>
+          <div>
+            <input type="text" id="forwarding-delay<%= id %>" name="forwarding-delay" placeholder="15" class="text-input" data-type="int" data-range="1-4294967295" />
+          </div>
+
+          <label class="primary" for="hello-time<%= id %>">Hello Time</label>
+          <div>
+            <input type="text" id="hello-time<%= id %>" name="hello-time" placeholder="2" class="text-input" data-type="int" data-range="1-4294967295" />
+          </div>
+
+          <label class="primary" for="max-age<%= id %>">Max Age</label>
+          <div>
+            <input type="text" id="max-age<%= id %>" name="max-age" placeholder="20" class="text-input" data-type="int" data-range="1-4294967295" />
+          </div>
+
+          <label class="primary" for="stp<%= id %>">Enable STP</label>
+          <div>
+            <input type="checkbox" id="stp<%= id %>" name="stp" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="tab-content interfaces">
+        <fieldset class="primary">
+          <ul class="bridged template" data-template="InterfaceInlineCheckboxTemplate"></ul>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigVlanTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary">VLAN ID</label>
+          <div><%= vif %></div>
+
+          <label class="primary" for="parent<%= id %>">Parent</label>
+          <div><%= parent %></div>
+
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" class="text-input" />
+          </div>
+
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary" data-field="address">Address</legend>
+          <fieldset class="addresses">
+            <div class="address">
+              <select name="address">
+                <option value="">No address</option>
+                <option value="dhcp">Use DHCP</option>
+                <option value="dhcpv6">Use DHCP for IPv6</option>
+                <option value="ip">Manually define IP address</option>
+              </select>
+              <div class="nested ip-section">
+                <div>
+                  <input type="text" class="text-input ip-member" data-infotip="IPv4 or IPv6 address with prefix<br/><br/>Example: <b>192.0.2.1/24</b>, <b>2001:db8:1000::1/64</b>"/>
+                </div>
+              </div>
+              <div class="nested dhcp">
+                <button type="button" class="renew">Renew</button>
+                <button type="button" class="release">Release</button>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+
+        <fieldset class="primary mtu">
+          <label class="primary" for="mtu<%= id %>">MTU</label>
+          <div>
+            <input type="text" id="mtu<%= id %>" name="mtu" value="1500" class="text-input" data-infotip="Maximum Transmission Unit 68-9000 (default 1500)"/>
+          </div>
+
+          <label class="primary" for="enable-proxy-arp<%= id %>">Proxy ARP</label>
+          <div>
+            <input type="checkbox" id="enable-proxy-arp<%= id %>" name="enable-proxy-arp" value="1" class="check-box-input" />
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigLoopbackTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="description<%= id %>">Description</label>
+          <div>
+            <input type="text" id="description<%= id %>" name="description" placeholder="<%= id %>" class="text-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <legend class="primary" data-field="address">Address</legend>
+          <fieldset class="addresses">
+            <div class="address">
+              <select name="address">
+                <option value="">No address</option>
+                <option value="dhcp">Use DHCP</option>
+                <option value="dhcpv6">Use DHCP for IPv6</option>
+                <option value="ip">Manually define IP address</option>
+              </select>
+              <div class="nested ip-section">
+                <div>
+                  <input type="text" class="text-input ip-member" data-infotip="IPv4 or IPv6 address with prefix<br/><br/>Example: <b>192.0.2.1/24</b>, <b>2001:db8:1000::1/64</b>"/>
+                </div>
+              </div>
+              <div class="nested dhcp">
+                <button type="button" class="renew">Renew</button>
+                <button type="button" class="release">Release</button>
+              </div>
+            </div>
+          </fieldset>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigPppoeTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content basic">
+        <fieldset class="primary">
+          <label class="primary" for="parent<%= id %>">Parent</label>
+          <div><%= parent %></div>
+        </fieldset>
+
+        <fieldset class="primary">
+          <label class="primary" for="address<%= id %>">Address</label>
+          <ul id="address<%= id %>" class="address"></ul>
+        </fieldset>
+
+        <fieldset class="primary">
+          <label class="primary" for="user<%= id %>">Account Name</label>
+          <div>
+            <input type="text" id="user<%= id %>" name="user" class="text-input" />
+          </div>
+
+          <label class="primary" for="password<%= id %>" >Password</label>
+          <div>
+            <input type="password" id="password<%= id %>" name="password" class="text-input" />
+            <input type="checkbox" id="showpw<%= id %>" name="showpw" />
+          </div>
+        </fieldset>
+
+        <fieldset class="primary mtu">
+          <label class="primary" for="mtu<%= id %>">MTU</label>
+          <div><input type="text" id="mtu<%= id %>" name="mtu" value="1492" class="text-input" data-infotip="Maximum Transmission Unit 68-1500 (default 1492)"/></div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="InterfacesConfigInvalidTemplate" type="text/template">
+  <div class="scrollable">
+      Unsupported UI interface type
+  </div>
+</script>
+
+<script id="InterfaceIpListTemplate" type="text/template">
+    <div class="ip-list">
+        \<%= ips %>
+    </div>
+    <span class="expand-collapse-toggle">see less</span>
+</script>
+
+<!-- End: Interfaces -->
+
+<!-- Start: Interface Fragments -->
+<script id="InterfacesAddDropDownButtonTemplate" type="text/template">
+  <button type="button">Add Interface</button>
+  <ul class="action-list">
+    <li><a class="add-vlan" >Add VLAN</a></li>
+    <li><a class="add-pppoe" >Add PPPoE</a></li>
+  </ul>
+</script>
+
+<script id="InterfaceInlineCheckboxTemplate" type="text/template">
+  <li><label class="inline"><input type="checkbox" name="<%= name %>" value="<%= value %>" class="check-box-input" /> <%= text %></label></li>
+</script>
+
+<script id="InterfacesDropDownButtonTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-poe" href="#">PoE</a></li>
+    <li><a class="action-status" href="#"></a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<!-- End: Interface Fragments -->

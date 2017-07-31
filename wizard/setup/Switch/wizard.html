@@ -1,0 +1,107 @@
+<div class="instructions" data-reboot="true">
+    Use this wizard to set up the device as a simple layer-2 switch
+</div>
+
+<fieldset name="manage" class="primary expanded">
+    <legend>Management access</legend>
+    <div class="instructions">
+        Configure network settings for management access
+    </div>
+    <div class="checkbox-toggle fullwidth">
+        <div>
+            <label>
+                <span class="label">Management VLAN</span>
+                <input type="checkbox" name="vlan" value="1" />
+                <span>Use non-default VLAN for management</span>
+            </label>
+            <div class="toggled nested hidden margin113">
+                <div>
+                    <label><span class="label">VLAN ID</span></label>
+                    <div>
+                        <input type="text" name="vid" data-infotip="VLAN ID must be between 1 and 4087" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grouped">
+        <div class="label"><span>Management IP</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="ip-options" class="wan-options" value="dhcp" checked="checked" />DHCP</label>
+            <div class="nested toggled">
+            <label>Automatically obtain management IP and other network settings using DHCP</label>
+            </div>
+
+            <label><input type="radio" name="ip-options" class="wan-options" value="static" />Static IP</label>
+            <div class="nested toggled hidden">
+                <label>Static management IP and other network settings<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">Address</span></div>
+                    <div><span><input type="text" name="static-address" value="" data-infotip='IP address (e.g., 12.34.56.78)' /></span></div>
+                    <div><span class="text"> / </span></div>
+                    <div><span><input type="text" name="static-mask" value="" data-infotip='Network mask (e.g., 255.255.255.0) or prefix length (e.g., 24)' /></span></div>
+                </label>
+                <label><div class="title"><span class="text">Gateway</span></div><div> <input type="text" name="static-gateway" value="" data-infotip='IP address of gateway (e.g., 12.34.56.78)' /></div></label>
+                <label><div class="title"><span class="text">DNS server</span></div><div> <input type="text" name="static-dns" class="static-dns" value="" data-infotip='IP address of DNS server (e.g., 12.34.56.78)' /></div></label>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset name="user" class="primary expanded">
+    <legend><span>User setup</span></legend>
+    <div class="instructions">
+        <span>
+        Set up user and password
+        </span>
+    </div>
+    <div class="grouped">
+        <div class="label"><span>User</span></div>
+        <div class="group radio-toggles">
+            <label><input type="radio" name="user-options" value="ubnt" checked="checked" />Use default user</label>
+            <div class="nested toggled">
+                <label>Use default user (ubnt)<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">User</span></div>
+                    <div> <input type="text" name="ubnt-user" value="ubnt" disabled /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Password</span></div>
+                    <div> <input type="password" name="ubnt-password" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Confirm Password</span></div>
+                    <div> <input type="password" name="ubnt-confirm-password" /></div>
+                </label>
+            </div>
+            <label><input type="radio" name="user-options" value="new" />Create new admin user</label>
+            <div class="nested toggled">
+                <label>Create new admin user. Note that the default user (ubnt) will be removed.<br /><br /></label>
+                <label class="multi">
+                    <div class="title"><span class="text">User</span></div>
+                    <div><input type="text" name="new-user" value="" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Password</span></div>
+                    <div> <input type="password" name="new-password" value="" class="password-password" /></div>
+                </label>
+                <label class="multi">
+                    <div class="title"><span class="text">Confirm Password</span></div>
+                    <div> <input type="password" name="new-confirm-password" value="" /></div>
+                </label>
+            </div>
+            <label><input type="radio" name="user-options" value="old" />Keep existing users</label>
+            <div class="nested toggled">
+                <label>Keep existing users/passwords already configured<br /><br /></label>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<div class="reset-manual hidden" data-reboot="true">
+    <p>The current configuration will be replaced and a reboot is required
+    for the new configuration to take effect. To reconnect to the Web UI
+    after the reboot, use the proper port and/or VLAN according to the management
+    network settings and the port VLAN settings above.</p>
+</div>

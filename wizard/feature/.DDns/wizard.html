@@ -1,0 +1,76 @@
+<fieldset name="test" class="primary interfaces">
+    <legend>Dynamic DNS</legend>
+    <div class="addable" data-min="0" data-object="ddns-config" data-objectify="1" data-name="ddns">
+        <div class="addable-template" data-level="0" data-parent="ddns">
+            <div class="multi84">
+                <label><span class="text">Interface</span></label><div><span><select name="interfaces" /></span></div>
+                <div class="addable" data-min="1" data-object="service-config" data-objectify="1" data-name="service">
+                    <label><span class="text">Web</span></label>
+                    <div><span><select name="web" class="has-other">
+                        <option value="">-</option>
+                        <option value="dyndns">dyndns</option>
+                        <option value="dnspark">dnspark</option>
+                        <option value="loopia">loopia</option>
+                        <option value="other">URL</option>
+                    </select></span></div>
+                    <label><span class="text">Web-skip</span></label><div><span><input type="text" name="webskip" /></span></div>
+                    <div class="clear40"></div>
+                    <div class="addable-template" data-level="1" data-parent="service">
+                        <div class="multi">
+                            <label><span class="text">Service</span></label><div><span><select name="services" class="has-other">
+                                <option value="">-</option>
+                                <option value="afraid">afraid</option>
+                                <option value="dnspark">dnspark</option>
+                                <option value="dyndns">dyndns</option>
+                                <option value="namecheap">namecheap</option>
+                                <option value="zoneedit">zoneedit</option>
+                                <option value="dslreports">dslreports</option>
+                                <option value="easydns">easydns</option>
+                                <option value="sitelutions">sitelutions</option>
+                                <option value="noip">noip</option>
+                                <option value="other">custom - </option>
+                            </select></span></div>
+                            <label><span class="text">Hostname</span></label><div><input type="text" name="hostname" data-infotip='e.g. mycompany.dyndns.org' /></div>
+                            <label><span class="text">Login</span></label><div><input type="text" name="login" /></div>
+                            <label><span class="text">Password</span></label><div><input type="password" name="password" /></div>
+                            <label><span class="text">Protocol</span></label><div><span><select name="protocol" class="has-other">
+                                <option value="">-</option>
+                                <option value=changeip>changeip</option>
+                                <option value=concont>concont</option>
+                                <option value=dnspark>dnspark</option>
+                                <option value=dslreports1>dslreports1</option>
+                                <option value=dtdns>dtdns</option>
+                                <option value=dyndns1>dyndns1</option>
+                                <option value=dyndns2>dyndns2</option>
+                                <option value=easydns>easydns</option>
+                                <option value=freedns>freedns</option>
+                                <option value=hammernode1>hammernode1</option>
+                                <option value=namecheap>namecheap</option>
+                                <option value=noip>noip</option>
+                                <option value=sitelutions>sitelutions</option>
+                                <option value=zoneedit1>zoneedit1</option>
+                            </select></span></div>
+                            <label><span class="text">Server</span></label><div><input type="text" name="server" /></div>
+                            <div class="clear20"></div>
+                        </div>
+                        <div><button type="button" class="addable-remove" data-level="1" data-parent="service">Remove Service</button></div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="addable-container" data-level="1" data-parent="service"></div>
+                    <div class="clear"></div>
+                    <button type="button" class="addable-add" data-parent="service">Add Service</button>
+                </div>
+            </div>
+            <div><button type="button" class="addable-remove" data-level="0" data-parent="ddns">Remove</button></div>
+            <div class="clear"></div>
+        </div>
+        <div class="addable-container" data-level="0" data-parent="ddns">
+            <!-- the addable templates will be inserted here -->
+        </div>
+        <div class="clear"></div>
+        <button type="button" class="addable-add" data-parent="ddns">Add DDNS Interface</button>
+    </div>
+</fieldset>
+<div class="extra-buttons">
+    <button type="button" class="force" data-icon="refresh">Force Update</button>
+</div>

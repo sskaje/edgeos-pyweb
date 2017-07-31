@@ -1,0 +1,20 @@
+{
+	"rules": {
+		"interfaces": {
+			"required": true,
+			"interfaceName": 1
+		},
+		"services": {
+			"required": true
+		},
+		"login": {
+			"required": true
+		},
+		"password": {
+			"required": true
+		},
+		"hostname": {
+			"required": true
+		}
+	}
+}

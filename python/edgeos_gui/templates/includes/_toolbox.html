@@ -1,0 +1,339 @@
+<div id="Toolbox" class="unrendered ui-dark">
+  <div class="buttonset">
+    <button type="button" class="cli-button">CLI</button>
+    <!--<button type="button" class="toolbox-button">Toolbox</button>-->
+    <button class="WelcomeLogoutButton">Logout</button>
+    <input type="checkbox" id="ToolboxButton" name="checkbox1"/><label for="ToolboxButton">Toolbox</label>
+  </div>
+
+  <ul id="ToolboxTools" class="undrendered">
+    <li class="ping"><span class="ui-icon ui-icon-pulse"></span>Ping</li>
+    <li class="bandwidth"><span class="ui-icon ui-icon-signal"></span>Bandwidth</li>
+    <li class="trace"><span class="ui-icon ui-icon-marker"></span>Trace</li>
+    <li class="discover"><span class="ui-icon ui-icon-magnify"></span>Discover</li>
+    <li class="packets"><span class="ui-icon ui-icon-microscope"></span>Packet Capture</li>
+    <li class="logmon"><span class="ui-icon ui-icon-note"></span>Log Monitor</li>
+  </ul>
+</div>
+
+<script id="ToolboxPingTemplate" type="text/template">
+  <div class="ping-toolbox">
+    <form method="post" class="ui-form">
+      <div class="section form">
+        <fieldset class="primary">
+          <label class="primary" for="destination<%= id %>">Destination Host/IP</label>
+          <div>
+            <input type="text" id="destination<%= id %>" name="destination" class="text-input" />
+          </div>
+
+          <label class="primary" for="packet-count<%= id %>">Packet Count</label>
+          <div>
+            <input type="text" id="packet-count<%= id %>" name="packet-count" class="text-input" />
+          </div>
+
+          <label class="primary" for="packet-size<%= id %>">Packet Size</label>
+          <div>
+            <input type="text" id="packet-size<%= id %>" name="packet-size" class="text-input" />
+          </div>
+        </fieldset>
+
+        <fieldset class="actions">
+          <button type="submit">Run Test</button>
+          <button type="button">Stop Test</button>
+        </fieldset>
+      </div>
+      <div class="section notices">
+        <div class="ui-widget-header title">Notices</div>
+      </div>
+      <div class="section table results">
+        <div class="ui-widget-header title">Test Results</div>
+
+        <div class="stats">
+          <span class="packets"></span><br />
+          <span class="times"></span>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Request</th>
+              <th>Host</th>
+              <th>Time</th>
+              <th>TTL</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+</script>
+
+<script id="ToolboxBandwidthTemplate" type="text/template">
+  <div class="bandwidth-toolbox">
+    <div class="dialog-tabs">
+      <ul>
+        <li class="sender"><a href="#sender">Sender</a></li>
+        <li class="receiver"><a href="#receiver">Receiver</a></li>
+      </ul>
+
+      <div class="tab-content sender" id="sender">
+        <form method="post" class="ui-form sender">
+          <div class="section form">
+            <fieldset class="primary">
+              <label><span>Run bandwidth test as the sender</span></label>
+              <label class="primary" for="destination<%= id %>">Receiver IP</label>
+              <div>
+                <input type="text" id="destination<%= id %>" name="destination" class="text-input"/>
+              </div>
+            </fieldset>
+
+            <fieldset class="advanced">
+              <label class="primary" for="duration">Duration (s)</label>
+              <div>
+                <input type="text" id="duration<%= id %>" name="duration" class="text-input"/>
+              </div>
+              <label class="primary" for="protocol">Protocol</label>
+              <div class="multi">
+                <select name="protocol" id="protocol<%= id %>">
+                  <option value="tcp" selected="selected">TCP</option>
+                  <option value="udp">UDP</option>
+                </select>
+                <div>
+                  <label for="udp-bandwidth" class="primary">UDP Bandwidth (Kbps)</label>
+                  <div><input type="text" name="udp-bandwidth" id="udp-bandwidth<%= id %>"/></div>
+                </div>
+              </div>
+              <label class="primary" for="parallel-flows">Parallel flows (1 - 20)</label>
+              <div>
+                <input type="text" id="parallel-flows<%= id %>" name="parallel-flows" class="text-input"
+                       data-infotip="number of flows, from 1 to 20"/>
+              </div>
+              <label class="primary" for="reverse-direction">Reverse direction</label>
+              <div>
+                <input type="checkbox" name="reverse-direction" id="reverse-direction<%= id %>"/>
+              </div>
+              <label class="primary" for="tcp-window-size">TCP window size (KBytes)</label>
+              <div>
+                <input type="text" id="tcp-window-size<%= id %>" name="tcp-window-size"/>
+              </div>
+              <div>
+              </div>
+            </fieldset>
+            <label class="advanced_setting show">Show advanced settings...</label>
+
+            <fieldset class="actions">
+              <button type="submit" data-role="sender" class="sender">Run Test</button>
+              <button type="button" data-role="sender" class="sender">Stop Test</button>
+            </fieldset>
+          </div>
+        </form>
+      </div>
+
+      <div class="tab-content receiver" id="receiver">
+        <form method="post" class="ui-form receiver">
+          <div class="section form">
+            <fieldset class="primary">
+              <label><span>Run bandwidth test as the receiver</span></label>
+            </fieldset>
+
+            <fieldset class="actions">
+              <button type="submit" data-role="receiver" class="receiver">Run Test</button>
+              <button type="button" data-role="receiver" class="receiver">Stop Test</button>
+            </fieldset>
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="clear"></div>
+    <div class="section notices">
+        <div class="ui-widget-header title">Notices</div>
+    </div>
+    <div class="section table results">
+        <div class="ui-widget-header title">Test Results</div>
+        <div class="canvas-container">
+            <div class="hover-stats">Hover for Details</div>
+            <div class="canvas"></div>
+        </div>
+    </div>
+
+  </div>
+</script>
+
+<script id="ToolboxTraceTemplate" type="text/template">
+  <div class="trace-toolbox">
+    <form method="post" class="ui-form">
+      <div class="section form">
+        <fieldset class="primary">
+          <label class="primary" for="destination<%= id %>">Destination Host</label>
+          <div>
+            <input type="text" id="destination<%= id %>" name="destination" class="text-input" />
+          </div>
+
+          <label class="indented inline"><input type="checkbox" name="resolve" value="all" class="check-box-input" /> Resolve IP Address</label>
+        </fieldset>
+
+        <fieldset class="actions">
+          <button type="submit">Run Test</button>
+          <button type="button">Stop Test</button>
+        </fieldset>
+      </div>
+      <div class="section notices">
+        <div class="ui-widget-header title">Notices</div>
+      </div>
+      <div class="section table results">
+        <div class="ui-widget-header title">Test Results</div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Host</th>
+              <th>IP</th>
+              <th>Responses</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+</script>
+
+<script id="ToolboxDiscoverTemplate" type="text/template">
+  <div class="filter-tools">
+    <select id="ToolboxDiscoverInterfaceSelect" class="interface-select"></select>
+    <input type="text" id="search<%= id %>" name="search" class="text-input interface-search" />
+  </div>
+  <div class="section table results">
+    <div class="ui-widget-header title">Discovered (<span id="ToolboxDiscoverDevicesDiscovered">0</span> devices), Displayed (<span id="ToolboxDiscoverDevicesDisplayed">0</span> devices)</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Interface</th>
+          <th>Hardware Address</th>
+          <th>Device Name</th>
+          <th>Product Name</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="ToolboxPacketsTemplate" type="text/template">
+  <div class="packets-toolbox">
+    <form method="post" class="ui-form">
+      <div class="section form">
+        <fieldset class="primary">
+          <label class="primary"
+                 for="interface<%= id %>">Interface</label>
+          <div>
+            <input type="text" id="interface<%= id %>"
+                   name="interface" class="text-input"/>
+          </div>
+
+          <label class="primary"
+                 for="pkt_count<%= id %>">Packet Limit</label>
+          <div>
+            <input type="text" id="pkt_count<%= id %>"
+                   name="pkt_count" class="text-input"/> packets
+          </div>
+
+          <label class="indented inline">
+            <input type="checkbox" name="resolve" value="all"
+                   class="check-box-input"/> Resolve addresses</label>
+
+          <label class="primary">Filter</label>
+          <div>
+            <label class="primary"> Protocol
+              <input type="text" id="f_proto"
+                     name="f_proto" class="text-input"/></label>
+            <label class="primary"> Address
+              <input type="text" id="f_address"
+                     name="f_address" class="text-input"/></label>
+            <label class="primary"> Port
+              <input type="text" id="f_port"
+                     name="f_port" class="text-input"/></label>
+          </div>
+          <label class="indented inline">
+            <input type="checkbox" name="f_neg" value="neg"
+                   class="check-box-input"/> Negate filter</label>
+        </fieldset>
+
+        <fieldset class="actions">
+          <button type="submit">Start</button>
+        </fieldset>
+      </div>
+      <div class="section notices">
+        <div class="ui-widget-header title">Notices</div>
+      </div>
+      <div class="section table results">
+        <div class="ui-widget-header title">Test Results</div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Packet</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+</script>
+
+<script id="ToolboxDiscoverDrillDownTemplate" type="text/template">
+  <div class="inner-details">
+    <div class="content">
+      <dl>
+        <dt>Firmware Version:</dt>
+        <dd><%= fwversion %></dd>
+        <dt>Uptime:</dt>
+        <dd><%= uptime %></dd>
+        <dt>Addresses:</dt>
+        <dd class="addresses">
+          <ul class="addresses-container"></ul>
+        <dd>
+      </dl>
+      <div class="product-image"></div>
+    </div>
+  </div>
+</script>
+
+<script id="ToolboxDiscoverAddressTemplate" type="text/template">
+  <li>hwaddr: <%= hwaddr %> / ipv4: <a href="http://<%= ipv4 %>" target="_blank"><%= ipv4 %><span class="ui-button-icon-primary ui-icon ui-icon-extlink"></a></li>
+</script>
+
+<script id="ToolboxDiscoverIPLinkTemplate" type="text/template">
+  <a class="exit-link" href="http://<%= ip %>" target="_blank"><%= ip %><span class="ui-button-icon-primary ui-icon ui-icon-extlink"></span></a>
+</script>
+
+<script id="ToolboxLogmonTemplate" type="text/template">
+  <div class="logmon-toolbox">
+    <div class="section logmon-filter">
+      <div class="input-wrapper">
+        <input type="text" name="filter" class="text-input"/>
+      </div>
+      <button>Play / Pause</button>
+    </div>
+    <div class="section table results">
+      <div class="ui-widget-header title">System log messages</div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</script>

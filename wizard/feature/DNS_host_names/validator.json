@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "hostname": {
+      "required": true,
+      "domain": 1
+    },
+    "inet": {
+      "required": true,
+      "ipv4": 1
+    }
+  }
+}

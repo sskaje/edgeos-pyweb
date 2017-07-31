@@ -1,0 +1,139 @@
+#!/bin/bash
+
+ACTION=$1
+INPUT=$2
+
+map="system static-host-mapping host-name"
+dns="service dns forwarding options"
+srv="service dhcp-server shared-network-name"
+
+cmd=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+run=/opt/vyatta/bin/vyatta-op-cmd-wrapper
+cli=cli-shell-api
+
+parse () {
+  local var=$1
+  local exp=$2
+  local val=$(cat $INPUT | jq "$exp" 2>/dev/null)
+  if [ $(expr index "$exp" []) -eq 0 ]; then
+    eval "$var=$val"
+  else
+    eval "$var=($val)"
+  fi
+}
+
+load () {
+  list=''
+  eval "names=($($cli listActiveNodes $map))"
+  for name in "${names[@]}"; do
+    alias=''
+    eval "values=($($cli returnActiveValues $map $name alias))"
+    for value in "${values[@]}"; do
+      [ -n "$alias" ] && alias+=','
+      alias+=$value
+    done
+    eval "values=($($cli returnActiveValues $map $name inet))"
+    for value in "${values[@]}"; do
+      [ -n "$list" ] && list+=','
+      list+="{\"hostname\":\"$name\",\"alias\":\"$alias\",\"inet\":\"$value\"}"
+    done
+  done
+
+  temp=$(mktemp)
+  $run show dhcp leases | awk 'NR>2 {print $5,$1,$6}' >$temp
+  eval "pools=($($cli listActiveNodes $srv))"
+  for pool in "${pools[@]}"; do
+    eval "subnet=$($cli listActiveNodes $srv $pool subnet)"
+    eval "names=($($cli listActiveNodes $srv $pool subnet $subnet static-mapping))"
+    for name in "${names[@]}"; do
+      eval "inet=$($cli returnActiveValue $srv $pool subnet $subnet static-mapping $name ip-address)"
+      echo "$pool $inet $name static-IP" >>$temp
+    done
+  done
+  sort -f -o $temp $temp
+
+  dhcp=''
+  while read -ra data; do
+    [ -n "$dhcp" ] && dhcp+=','
+    dhcp+="{\"dname\":\"${data[2]}\",\"dpool\":\"${data[0]}\",\"dinet\":\"${data[1]}\",\"dinfo\":\"${data[3]}\"}"
+  done <$temp
+  rm -f $temp
+
+  echo "{\"success\":\"1\",\"data\":{\"static-mapping\":[$list],\"dynamic-mapping\":[$dhcp]}}"
+}
+
+apply () {
+  local ret=0
+  local output=''
+  local -A name
+
+  parse hosts '."static-mapping"[]."hostname"'
+  parse alias '."static-mapping"[]."alias"'
+  parse inets '."static-mapping"[]."inet"'
+
+  for host in "${hosts[@]}"; do
+    if [ -n "${name[${host,,}]}" ]; then
+      output="Host name <b>'${host,,}'</b> exists more than once"
+      ret=1
+      break
+    fi
+    name[${host,,}]=1
+  done
+
+  if [ $ret == 0 ]; then
+    temp=$(mktemp)
+    (
+    $cmd begin
+    ret=0
+    $cmd delete $map || ret=1
+    if [ $ret == 0 ]; then
+      for ((i = 0; i < ${#hosts[@]}; i++)); do
+        if ! $cmd set $map "${hosts[i]}" inet "${inets[i]}"; then
+          ret=1
+          break
+        fi
+        for name in ${alias[i]//,/ }; do
+          if [ -z "$name" ] || [ "$name" == null ]; then
+            continue
+          fi
+          if ! $cmd set $map "${hosts[i]}" alias "$name"; then
+            ret=1
+            break
+          fi
+        done
+        if [ $ret == 1 ]; then
+          break
+        fi
+      done
+    fi
+
+    if [ $ret == 0 ]; then
+      $cmd commit || ret=1
+    fi
+    if [ $ret == 0 ]; then
+      $cmd save || ret=1
+    fi
+    $cmd end
+    exit $ret
+    ) >$temp 2>&1
+    ret=$?
+
+    output=$(cat $temp)
+    rm -f $temp
+  fi
+
+  if [ $ret == 0 ]; then
+    echo "{\"success\":\"1\"}"
+  else
+    echo "{\"success\":\"0\",\"error\": \"${output//\"/\'}\"}"
+  fi
+}
+
+case "$ACTION" in
+load)
+  load
+  ;;
+apply)
+  apply
+  ;;
+esac

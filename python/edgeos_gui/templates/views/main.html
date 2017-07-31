@@ -1,0 +1,132 @@
+%include('common/header')
+
+<!-- Start: Page Content -->
+<div id="PageContent">
+
+  <!-- Start: Application Loading -->
+  <div id="ApplicationLoading">
+    <!-- Start: Header -->
+    <div class="page-header">
+      <div class="ir edgeos-header-logo">EdgeOS</div>
+      <div class="model">{{ model_name }}</div>
+    </div>
+    <!-- End: Header -->
+
+    <div class="content-outer-container ui-preload-hover-icons">
+      <div class="content-inner-container">
+        <div class="content">
+          <h1 class="section-title">Please wait while the application loads…</h1>
+
+          <!-- Start: Section Container -->
+          <div class="section-container tall">
+            <div class="application-loader"></div>
+          </div>
+          <!-- End: Section Container -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End: Application Loading -->
+
+  <!-- Start: Header -->
+   <div id="PageHeader" class="page-header unrendered">
+    <div class="ir edgeos-header-logo">EdgeOS</div>
+    <div class="model">
+      <span class="name">{{ model_name }}</span>
+      <span class="version"></span>
+    </div>
+
+    %include('includes/_quickinfo')
+  </div>
+  <!-- End: Header -->
+
+  %include('includes/_noscript')
+
+  <!-- Start: Welcome -->
+  <div id="Welcome" class="clearfix unrendered">
+    <div class="drop-down">
+      <div class="ui-button ui-widget-header ui-button-text-icon-secondary ui-corner-top">
+        <span class="ui-button-text">Welcome <span class="full-name"></span></span>
+        <span class="ui-button-icon-secondary ui-icon ui-icon-triangle-1-s"></span>
+      </div>
+      <ul class="ui-corner-bottom actions">
+        <li class="ui-corner-bottom"><button class="WelcomeLogoutButton">Logout</button></li>
+      </ul>
+    </div>
+    <div id="HostName" class="ui-button ui-widget-header ui-button-text-icon-secondary">
+      <span class="ui-button-text">to <span class="host-name"></span></span>
+    </div>
+  </div>
+  <!-- End: Welcome -->
+
+  <!-- Start: Main Panel -->
+  <div id="MainPanel" class="main-panel unrendered">
+
+    <!-- Start: Primary Tab Navigation -->
+    <ul id="Navigation" class="navigation-tabs ui-alternate">
+      <li id="NavDashboard"><a href="#Dashboard">Dashboard</a></li>
+      %if device_model == "UF-OLT":
+        <li id="NavOnus"><a href="#ONUs">ONU List</a></li>
+        <li id="NavOnuProfiles"><a href="#ONUProfiles">ONU Profiles</a></li>
+        <li id="NavUsers"><a href="#Users">Users</a></li>
+      %else:
+        <li id="NavTrafficAnalysis"><a href="#TrafficAnalysis">Traffic Analysis</a></li>
+        <li id="NavRouting"><a href="#Routing">Routing</a></li>
+        <li id="NavSecurity"><a href="#Security">Firewall/NAT</a></li>
+        <li id="NavServices"><a href="#Services">Services</a></li>
+        <li id="NavVpn"><a href="#Vpn">VPN</a></li>
+        <li id="NavQos"><a href="#QoS">QoS</a></li>
+        <li id="NavUsers"><a href="#Users">Users</a></li>
+        %if level == "admin":
+        <li id="NavConfigTree"><a href="#ConfigTree">Config Tree</a></li>
+        <li id="NavWizard"><a href="#Wizard">Wizards</a></li>
+        %end
+      %end
+    </ul>
+    <!-- End: Primary Tab Navigation -->
+
+    <!-- Start: Content -->
+    <div class="content-outer-container">
+      <div class="content-inner-container">
+        <div class="content">
+            %include('includes/dashboard')
+            %include('includes/interfaces')
+            %include('includes/routing')
+            %include('includes/security')
+            %include('includes/services')
+            %include('includes/vpn')
+            %include('includes/users')
+            %include('includes/wizard')
+            %include('includes/tree')
+            %include('includes/analysis')
+            %include('includes/qos')
+            %if device_model == "UF-OLT":
+              %include('includes/onus')
+              %include('includes/onuprofiles')
+            %end
+
+          <div id="FlashBar"></div>
+        </div>
+
+        <!-- Start: Copyright -->
+        <div class="legal">
+          &copy; Copyright 2012-2017 Ubiquiti Networks, Inc.
+        </div>
+        <!-- End: Copyright -->
+      </div>
+    </div>
+    <!-- End: Content -->
+
+  </div>
+  <!-- End: Main Panel -->
+
+  %include('includes/_settings')
+  %include('includes/_toolbox')
+  %include('includes/_dialog')
+  %include('includes/_footer')
+
+  <ul id="DebugControl" class="unrendered"></ul>
+</div>
+<!-- End: Page Content -->
+
+%include('common/footer')

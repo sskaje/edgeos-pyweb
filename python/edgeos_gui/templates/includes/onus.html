@@ -1,0 +1,166 @@
+<!-- Start: ONUs -->
+<div id="Onus" class="main-section">
+  <h1 class="section-title">ONU List</h1>
+  <div class="wide tall section-container"></div>
+</div>
+
+<script id="OnusDefaultTemplate" type="text/template">
+  <div id="OnuList" class="section-container table-container">
+    <div id="OnuListButtons">
+      <button id="OnuListUpgradeButton" type="button">Upgrade ONUs</button>
+      <button id="OnuListPoliciesButton" type="button">Edit ONU Policies</button>
+    </div>
+    <div id="OnuListStatusFilters" class="filters">
+      <ul class="ui-tabs-buttonset">
+        <li class="all"><a href="#ONUs">All</a></li>
+        <li class="connected"><a href="#ONUs/filter/connected">Connected</a></li>
+        <li class="disabled"><a href="#ONUs/filter/disabled">Disabled</a></li>
+      </ul>
+    </div>
+    <div id="OnuListOltPortFilter">
+      <select>
+        <option value=''>Select PON Port</option>
+        <option value='1'>PON Port 1</option>
+        <option value='2'>PON Port 2</option>
+        <option value='3'>PON Port 3</option>
+        <option value='4'>PON Port 4</option>
+        <option value='5'>PON Port 5</option>
+        <option value='6'>PON Port 6</option>
+        <option value='7'>PON Port 7</option>
+        <option value='8'>PON Port 8</option>
+      </select>
+    </div>
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th></th>
+        <th>Status</th>
+        <th>Serial Number</th>
+        <th>Name</th>
+        <th>Profile</th>
+        <th>PON Port / ONU ID</th>
+        <th>Model (Version)</th>
+        <th>Tx Power</th>
+        <th>Rx Power</th>
+        <th>Connection Time</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</script>
+
+<script id="OnusUpgradeTemplate" type="text/template">
+  <form method="post" class="ui-form" enctype="multipart/form-data">
+    <div>
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary required" for="upgraded-onus">ONUs to upgrade</label>
+            <div>
+              <select name="upgraded_onus" id="upgraded-onus">
+                <option value="">Select ONUs to upgrade</option>
+                <option value="selected">Only selected</option>
+                <option value="1">PON Port 1</option>
+                <option value="2">PON Port 2</option>
+                <option value="3">PON Port 3</option>
+                <option value="4">PON Port 4</option>
+                <option value="5">PON Port 5</option>
+                <option value="6">PON Port 6</option>
+                <option value="7">PON Port 7</option>
+                <option value="8">PON Port 8</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+
+            <label class="primary required" for="onu-upgrade-image">Upgrade image</label>
+            <div>
+              <input type="file" name="upgrade_image" id="onu-upgrade-image">
+            </div>
+
+          </fieldset>
+
+          <fieldset class="primary">
+            <div id="upgraded-onus-info">
+              <span id="upgraded-onus-count">0</span> ONUs will be upgraded
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Upgrade</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script id="OnusDropDownButtonTemplate" type="text/template">
+  <button type="button">Actions</button>
+  <ul class="action-list">
+    <li><a class="action-toggle" href="#">Toggle</a></li>
+    <li><a class="action-config" href="#">Config</a></li>
+    <li><a class="action-reboot" href="#">Reboot</a></li>
+    <li><a class="action-delete" href="#">Delete</a></li>
+  </ul>
+</script>
+
+<script id="OnusConfigTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="scrollable">
+      <div class="tab-content config">
+        <fieldset class="primary">
+          <label class="primary required" for="name<%= id %>">Name</label>
+          <div>
+            <input type="text" id="name<%= id %>" name="name" class="text-input"/>
+          </div>
+          <label class="primary" for="enabled<%= id %>">Enable</label>
+          <div>
+            <input type="checkbox" id="enabled<%= id %>" name="enabled" value="1" class="check-box-input"/>
+          </div>
+        </fieldset>
+        <fieldset class="primary">
+          <label class="primary" for="profile<%= id %>">Profile</label>
+          <div>
+            <select id="profile<%= id %>" name="profile">
+              \<% profiles.each(function(profile) { %>
+              <option value="<%= profile.id %>"><%= profile.get('name') %></option>
+              \<% }); %>
+            </select>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+
+<script id="OnusPoliciesConfigTemplate" type="text/template">
+  <form method="post" class="ui-form" enctype="multipart/form-data">
+    <div>
+      <div class="tab-content unpadded info">
+        <div class="section form">
+          <fieldset class="primary">
+            <label class="primary" for="default-state">Default ONU state</label>
+            <div>
+              <select name="default-state" id="default-state">
+                <option value="enabled">Enabled</option>
+                <option value="disabled">Disabled</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset class="actions">
+            <button type="submit">Save</button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
+</script>
+
+<!-- End: ONUs -->

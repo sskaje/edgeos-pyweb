@@ -1,0 +1,66 @@
+<fieldset class="note">
+    <div>WARNING: Applying changes in UI will override all changes made by CLI.</div>
+</fieldset>
+<fieldset name="vpn" class="primary interfaces">
+    <legend class="advance hidden">IPsec</legend>
+    <div class="general">
+        <legend class="section">Global Options</legend>
+        <label><span class="text">Firewall</span></label>
+        <input type="checkbox" name="afne" value="enable" /><span>Automatically open firewall and exclude from NAT</span>
+    </div>
+    <div class="clear"></div>
+    <div class="addable" data-name="vpn" data-level="0" data-min="0" data-object="vpn-config" data-objectify="1">
+        <legend class="section">Site-to-site peers</legend>
+        <div class="addable-template" data-parent="vpn" data-level="0">
+            <div class="multi">
+                <label><span class="text">Peer</span></label><div><input type="text" name="dest" data-infotip="Peer router's IPv4/IPv6 address or hostname" /></div><button type="button" class="addable-remove" data-level="0" data-parent="vpn">Remove Peer</button>
+                <div class="peer level1">
+                <label><span class="text">Description</span></label><div><input type="text" name="description" /></div>
+                <label><span class="text">Local IP</span></label><div><input type="text" name="src" data-infotip="This router's IPv4/IPv6 address or 'any'" /></div>
+                <div class="clear"></div>
+                <div class="advance-container">
+                    <label><span class="text">Encryption</span></label><div><select name="encryption"><option value="aes128">AES-128</option><option value="aes256">AES-256</option><option value="3des">3DES</option></select></div>
+                    <label><span class="text">Hash</span></label><div><select name="hash"><option value="sha1">SHA1</option><option value="md5">MD5</option></select></div>
+                    <label><span class="text">DH Group</span></label>
+                    <div>
+                        <select name="dh-group" data-init="14">
+                            <option value="2">2</option>
+                            <option value="5">5</option>
+                            <option value="14" selected>14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                        </select>
+                    </div>
+                </div>
+                <label><span class="text">Pre-shared secret</span></label><div><input type="text" name="pw" class="password" data-infotip="Pre-shared secret with peer router" /></div>
+                <div class="clear"></div>
+
+                <div class="addable" data-name="subnets" data-level="1" data-min="1" data-object="subnets-config" data-objectify="1">
+                    <div class="addable-template" data-parent="subnets" data-level="1">
+                        <label><span class="text">Local subnet</span></label><div><input type="text" name="srcsub" data-infotip="Local IPv4/IPv6 subnet" /></div>
+                        <label><span class="text">Remote subnet</span></label><div><input type="text" name="destsub" data-infotip="Remote IPv4/IPv6 subnet" /></div>
+                        <div class="remove" data-parent="subnets"><button type="button" class="addable-remove" data-parent="subnets" data-level="1">Remove Subnets</button></div>
+                        <div class="clear"></div>
+                        <br />
+                    </div>
+                    <div class="addable-container" data-parent="subnets" data-level="1"></div>
+                    <div class="clear"></div>
+                    <button type="button" class="addable-add" data-parent="subnets">Add Subnets</button>
+                </div>
+                <div class="clear"></div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="addable-container" data-parent="vpn" data-level="0">
+            <!-- the addables will be inserted here -->
+        </div>
+        <div class="clear"></div>
+        <button type="button" class="addable-add" data-parent="vpn">Add Peer</button>
+    </div>
+</fieldset>

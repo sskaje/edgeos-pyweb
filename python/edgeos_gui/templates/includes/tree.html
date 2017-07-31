@@ -1,0 +1,86 @@
+<!-- Start: Config Tree -->
+<div id="ConfigTree" class="main-section">
+  <div class="section-container tall"></div>
+</div>
+
+<script id="ConfigTreeTemplate" type="text/template">
+  <div class="tree">
+    <div class="list ui-layout-west">
+      <!-- config tree list template -->
+    </div>
+    <div id ="content" class="form ui-layout-center">
+      <div class="ui-layout-center">
+        <legend class="track">root</legend>
+        <form class="initial">
+        <!-- config tree form template -->
+        <!-- config tree form actions template -->
+        </form>
+      </div>
+      <div class="actions-container ui-layout-south"></div>
+    </div>
+  </div>
+</script>
+
+<script id="ConfigTreeFormTemplate" type="text/template">
+  <fieldset class="form">
+  </fieldset>
+</script>
+
+<script id="ConfigTreeListTemplate" type="text/template">
+  <div class="section-title">Configuration</div>
+  <div class="section-container"></div>
+</script>
+
+<script id="ConfigTreeActionsTemplate" type="text/template">
+  <fieldset class="actions">
+    <button type="button" class="cancel">Cancel</button>
+    <button type="button" class="apply">Preview</button>
+  </fieldset>
+</script>
+
+<script id="ConfigTreeListItemTemplate" type="text/template">
+  <span>
+    <span class="ui-icon-triangle-1-e ui-icon"></span>
+    <span class="readonly"></span>
+  </span>
+</script>
+
+<script id="ConfigTreeContentTextTemplate" type="text/template">
+  <label><span class="text"></span></label>
+  <div>
+    <span>
+      <input type="text" data-infotip="" />
+    </span>
+  </div>
+</script>
+
+<script id="ConfigTreeContentAddableTemplate" type="text/template">
+  <label><span class="text"></span></label>
+  <div class="addable">
+    <div class="addable-template">
+      <div class="select-template">
+        <div class="multi">
+          <span><select /></span>
+          <span><button type="button" class="addable-remove">Remove</button></span>
+        </div>
+      </div>
+      <div class="text-template">
+        <div class="multi">
+          <span><input type="text" data-infotip="" /></span>
+          <span><button type="button" class="addable-remove">Remove</button></span>
+        </div>
+      </div>
+    </div>
+    <div class="addable-container">
+        <!-- the addables will be inserted here -->
+    </div>
+    <button type="button" class="addable-add">Add</button>
+  </div>
+</script>
+
+<script id="ConfigTreeCommitConfirmTemplate" type="text/template">
+  <div><span>Commands to Commit:</span></div>
+  <ul class="cmds">
+    \<%= cmds %>
+  </ul>
+</script>

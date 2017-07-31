@@ -1,0 +1,29 @@
+<!-- Start: Settings -->
+<script id="SettingsTemplate" type="text/template">
+  <form method="post" class="ui-form">
+    <div class="dialog-tabs">
+      <ul>
+        <li><a href="#keepalive">Keepalive</a></li>
+      </ul>
+    </div>
+
+    <div class="scrollable">
+      <div class="tab-content keepalive">
+        <fieldset class="primary">
+          <fieldset class="primary">
+            <ul>
+              <li><label class="inline"><input type="radio" name="keepalive" value="0" class="radio-input" /> Automatically sign out after 20 minutes of inactivity</label></li>
+              <li><label class="inline"><input type="radio" name="keepalive" value="1" class="radio-input" /> Sign out manually (good for monitoring stats)</label></li>
+            </ul>
+          </fieldset>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="small save">Save</button>
+      <button type="button" class="small cancel">Cancel</button>
+    </div>
+  </form>
+</script>
+<!-- End: Settings -->

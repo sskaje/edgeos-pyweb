@@ -1,0 +1,78 @@
+<fieldset name="bq" class="primary">
+    <legend class="section advance hidden">Queues</legend>
+    <div class="addable" data-min="0" data-object="bq-config" data-objectify="1">
+        <div class="addable-template">
+            <div class="input-container">
+                <input type="text" class="ip" name="src" data-infotip="Source IP or network, for example, <b>11.1.1.1</b>, <b>22.2.2.0/24</b>" />
+            </div>
+            <div class="input-container">
+                <input type="text" class="ip" name="dest" data-infotip="Destination IP or network, for example, <b>11.1.1.1</b>, <b>22.2.2.0/32</b>" />
+            </div>
+            <div class="input-container">
+                <select name="application" class="application"></select>
+            </div>
+            <div class="input-container" >
+                <input type="text" class="rate" name="rate"
+                    data-infotip="Bandwidth limit (source to destination) in &quot;bits per second&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" />
+            </div>
+            <div class="input-container advance-container">
+                <input type="text" class="rate rate-sub" name="brate"
+                    data-infotip="Burst rate (source to destination) in &quot;bits per second&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" />
+            </div>
+            <div class="input-container advance-container">
+                <input type="text" class="rate rate-sub" name="bsize"
+                    data-infotip="Burst size (source to destination) in &quot;bytes&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" />
+            </div>
+            <div class="interactive-select interactive" data-template="qtype">
+                <select class="qtype rate-sub" name="qtype">
+                    <option value=""></option>
+                    <option value="fq-codel">FQ_CODEL</option>
+                    <option value="hfq">HFQ</option>
+                    <option value="sfq">SFQ</option>
+                    <option value="pfifo">PFIFO</option>
+                </select>
+            </div>
+            <div class="input-container">
+                <input type="text" class="rate" name="r_rate"
+                    data-infotip="Reverse bandwidth limit (destination to source) in &quot;bits per second&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" />
+            </div>
+            <div class="input-container advance-container">
+                <input type="text" class="rate r_rate-sub" name="r_brate"
+                    data-infotip="Reverse burst rate (destination to source) in &quot;bits per second&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" />
+            </div>
+            <div class="input-container advance-container">
+                <input type="text" class="rate r_rate-sub" name="r_bsize"
+                    data-infotip="Reverse burst size (destination to source) in &quot;bytes&quot;, for example, <b>1200</b>, <b>5k</b>, <b>12m</b>" />
+            </div>
+            <div class="interactive interactive-select" data-template="rqtype">
+                <select class="qtype r_rate-sub" name="r_qtype">
+                    <option value=""></option>
+                    <option value="fq-codel">FQ_CODEL</option>
+                    <option value="hfq">HFQ</option>
+                    <option value="sfq">SFQ</option>
+                    <option value="pfifo">PFIFO</option>
+                </select>
+            </div>
+            <div class="remove">
+                <button type="button" class="addable-remove">Remove Queue</button>
+            </div>
+        </div>
+        <table class="addable-container">
+            <tr>
+                <th class="ip">Source</th>
+                <th class="ip">Destination</th>
+                <th class="application">Application</th>
+                <th class="rate">Rate</th>
+                <th class="rate advance-container">Burst Rate</th>
+                <th class="rate advance-container">Burst Size</th>
+                <th class="qtype">Queue Type</th>
+                <th class="rate">Reverse Rate</th>
+                <th class="rate advance-container">Reverse Burst Rate</th>
+                <th class="rate advance-container">Reverse Burst Size</th>
+                <th class="qtype">Reverse Queue Type</th>
+            </tr>
+            <!-- the addables will be inserted here -->
+        </table>
+        <button type="button" class="addable-add">Add Queue</button>
+    </div>
+</fieldset>
