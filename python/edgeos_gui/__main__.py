@@ -6,7 +6,7 @@ import os
 from beaker.middleware import SessionMiddleware
 import bottle
 
-from .api import edge, wizard
+from .api import edge, wizard, custom
 from . import views
 from .utils import ubnt, csrf,\
     NamedFileFieldStorage, ErrorMiddleware,\
@@ -47,6 +47,7 @@ def init_app(debug=False, uncompressed_assets=False):
     app.config['device.config'] = device_config
     app.config['build_id'] = ubnt.get_build_id()
     app.config['debug'] = debug
+    app.config['custom.dir'] = BASE_DIR + "/custom"
 
     defaults = {
         'compressed': not uncompressed_assets,
@@ -73,6 +74,8 @@ def init_app(debug=False, uncompressed_assets=False):
     api_prefix = "/api"
     edge.register_urls(app, api_prefix + "/edge")
     wizard.register_urls(app, api_prefix + "/wizard")
+
+    custom.register_custom(app, "/custom")
 
     # Add bottle request hooks
     app.add_hook('after_request', apply_http_hardening_headers)

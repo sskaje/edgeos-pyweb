@@ -1,0 +1,94 @@
+%include('common/header')
+<style type="text/css">
+    pre.result {
+        font-size: 11px;
+        position: relative;
+        overflow: auto;
+        max-height: 120px;
+        width: 100%;
+    }
+
+    div.content {
+        padding: 0 10px;
+    }
+</style>
+<div class="content" style="overflow: auto;">
+
+    <h1>IPSet Quick Manage</h1>
+    <div>Client IP: {{ client_ip }}</div>
+
+    <p>
+        <input type="button" class="submit-input ui-button ui-widget ui-state-default ui-corner-all"
+               onclick="ipset_add('all')"
+               value="All Traffic ON"/>
+        <input type="button" class="submit-input ui-button ui-widget ui-state-default ui-corner-all"
+               onclick="ipset_delete('all')"
+               value="All Traffic OFF"/>
+    </p>
+    <pre class="result" data-group="all">{{ ipset['all'] }}</pre>
+
+    <p>
+        <input type="button" class="submit-input ui-button ui-widget ui-state-default ui-corner-all"
+               onclick="ipset_add('cdn')"
+               value="CDN Traffic ON"/>
+        <input type="button" class="submit-input ui-button ui-widget ui-state-default ui-corner-all"
+               onclick="ipset_delete('cdn')"
+               value="CDN Traffic OFF"/>
+    </p>
+    <pre class="result" data-group="cdn">{{ ipset['cdn'] }}</pre>
+
+    <p>
+        <input type="button" class="submit-input ui-button ui-widget ui-state-default ui-corner-all"
+               onclick="ipset_add('hijack')"
+               value="Hijack 443 ON"/>
+        <input type="button" class="submit-input ui-button ui-widget ui-state-default ui-corner-all"
+               onclick="ipset_delete('hijack')"
+               value="Hijack 443 OFF"/>
+    </p>
+    <pre class="result" data-group="hijack">{{ ipset['hijack'] }}</pre>
+</div>
+<script type="text/javascript">
+
+    var pres = document.getElementsByTagName('pre');
+    for (var i = 0; i < pres.length; i++) {
+        var name = pres[i].getAttribute('data-group');
+        pres[i].innerHTML = pres[i].innerHTML.replace(/(\d+\.\d+\.\d+\.\d+)\n/g, '$1 [<a href="javascript:ipset_delete(\'' + name + '\', \'$1\')">X</a>]\n')
+    }
+
+    var client_ip = '{{ client_ip }}';
+
+    function ipset_execute_command(command, groupname, ip) {
+        jQuery.post(
+                "/custom/ipset/" + command + ".json",
+                "groupname=" + encodeURIComponent(groupname) + "&ip=" + encodeURIComponent(ip)
+        )
+    }
+
+    function ipset_get(groupname) {
+        ipset_execute_command("get", groupname, "")
+    }
+
+    function ipset_add(groupname, ip) {
+        if (typeof ip == 'undefined') {
+            ip = client_ip
+        }
+
+        ipset_execute_command("add", groupname, ip);
+
+        location.reload()
+    }
+
+    function ipset_delete(groupname, ip) {
+        if (typeof ip == 'undefined') {
+            ip = client_ip
+        }
+
+        ipset_execute_command("delete", groupname, ip);
+
+        location.reload()
+    }
+
+
+</script>
+
+%include('common/footer')
